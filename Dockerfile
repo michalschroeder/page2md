@@ -1,4 +1,4 @@
-FROM oven/bun:1-slim
+FROM oven/bun:1-slim@sha256:7e8ed3961db1cdedf17d516dda87948cfedbd294f53bf16462e5b57ed3fff0f1
 
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
