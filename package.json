@@ -1,6 +1,6 @@
 {
   "name": "page2md",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Render any URL with headless Chromium and extract clean Markdown.",
   "module": "index.ts",
   "type": "module",
