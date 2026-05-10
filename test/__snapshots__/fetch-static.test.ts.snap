@@ -1,0 +1,75 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`fetches static HTML and runs defuddle 1`] = `
+"![](https://upload.wikimedia.org/wikipedia/commons/d/d9/Plain_text.png)
+
+Text file with portion of The Human Side of Animals by Royal Dixon, displayed by the command cat in an xterm window
+
+In [computing](https://en.wikipedia.org/wiki/Computing "Computing"), **plain text** is a loose term for data (e.g. file contents) that represent only [characters](https://en.wikipedia.org/wiki/Character_\\(computing\\) "Character (computing)") of readable material but not its graphical representation nor other objects ([floating-point numbers](https://en.wikipedia.org/wiki/Floating_point_numbers "Floating point numbers"), images, etc.). It may also include a limited number of "whitespace" characters that affect simple arrangement of text, such as spaces, line breaks, or tabulation characters. Plain text is different from [formatted text](https://en.wikipedia.org/wiki/Formatted_text "Formatted text"), where style information is included; from structured text, where structural parts of the document such as paragraphs, sections, and the like are identified; and from [binary files](https://en.wikipedia.org/wiki/Binary_files "Binary files") in which some portions must be interpreted as binary objects (encoded integers, real numbers, images, etc.).
+
+The term is sometimes used quite loosely, to mean files that contain *only* "readable" content (or just files with nothing that the speaker does not prefer). For example, that could exclude any indication of fonts or layout (such as markup, markdown, or even tabs); characters such as curly quotes, non-breaking spaces, soft hyphens, em dashes, and/or ligatures; or other things.
+
+In principle, plain text can be in any [encoding](https://en.wikipedia.org/wiki/Character_encoding "Character encoding"), but occasionally the term is taken to imply [ASCII](https://en.wikipedia.org/wiki/ASCII "ASCII"). As [Unicode](https://en.wikipedia.org/wiki/Unicode "Unicode") -based encodings such as [UTF-8](https://en.wikipedia.org/wiki/UTF-8 "UTF-8") and [UTF-16](https://en.wikipedia.org/wiki/UTF-16 "UTF-16") become more common, that usage may be shrinking.
+
+Plain text is also sometimes used only to exclude "binary" files: those in which at least some parts of the file cannot be correctly interpreted via the character encoding in effect. For example, a file or [string](https://en.wikipedia.org/wiki/String_\\(computer_science\\) "String (computer science)") consisting of "hello" (in any encoding), following by 4 bytes that express a binary integer that is *not* a character, is a binary file. Converting a plain text file to a different character encoding does not change the meaning of the text, as long as the correct character encoding is used. However, converting a binary file to a different format may alter the interpretation of the non-textual data.
+
+## Plain text and rich text
+
+According to The Unicode Standard:[^1]
+
+- "Plain text is a pure sequence of character codes; plain Un-encoded text is therefore a sequence of Unicode character codes.
+- In contrast, *styled text*, also known as *rich text*, is any text representation containing plain text plus added information such as a language identifier, font size, color, hypertext links, and so on.
+- [SGML](https://en.wikipedia.org/wiki/SGML "SGML"), [RTF](https://en.wikipedia.org/wiki/Rich_Text_Format "Rich Text Format"), [HTML](https://en.wikipedia.org/wiki/HTML "HTML"), [XML](https://en.wikipedia.org/wiki/XML "XML"), and [TeX](https://en.wikipedia.org/wiki/TeX "TeX") are examples of rich text fully represented as plain text streams, interspersing plain text data with sequences of characters that represent the additional data structures."
+
+According to other definitions, however, files that contain [markup](https://en.wikipedia.org/wiki/Markup_language "Markup language") or other [meta-data](https://en.wikipedia.org/wiki/Meta-data "Meta-data") are generally considered plain text, so long as the markup is also in a directly [human-readable](https://en.wikipedia.org/wiki/Human-readable "Human-readable") form (as in HTML, XML, and so on). Thus, representations such as SGML, RTF, HTML, XML, [wiki markup](https://en.wikipedia.org/wiki/Wiki_markup "Wiki markup"), and TeX, as well as nearly all programming language source code files, are considered plain text. The particular content is irrelevant to whether a file is plain text. For example, an [SVG](https://en.wikipedia.org/wiki/Scalable_Vector_Graphics "Scalable Vector Graphics") file can express drawings or even bitmapped graphics, but is still plain text.
+
+The use of plain text rather than binary files enables files to survive much better "in the wild", in part by making them largely immune to computer architecture incompatibilities. For example, with all data encoded as [UTF-8](https://en.wikipedia.org/wiki/UTF-8 "UTF-8") text, all the problems of [endianness](https://en.wikipedia.org/wiki/Endianness "Endianness") can be avoided.
+
+## Usage
+
+The purpose of using plain text today is primarily independence from programs that require their very own special encoding or formatting or [file format](https://en.wikipedia.org/wiki/File_format "File format"). Plain text files can be opened, read, and edited with ubiquitous [text editors](https://en.wikipedia.org/wiki/Text_editor "Text editor") and utilities.
+
+A [command-line interface](https://en.wikipedia.org/wiki/Command-line_interface "Command-line interface") allows people to give commands in plain text and get a response, also typically in plain text.
+
+Many other computer programs are also capable of processing or creating plain text, such as countless programs in [DOS](https://en.wikipedia.org/wiki/DOS "DOS"), [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows "Microsoft Windows"), [classic Mac OS](https://en.wikipedia.org/wiki/Classic_Mac_OS "Classic Mac OS"), and [Unix](https://en.wikipedia.org/wiki/Unix "Unix") and its kin; as well as web browsers (a few browsers such as [Lynx](https://en.wikipedia.org/wiki/Lynx_\\(web_browser\\) "Lynx (web browser)") and the [Line Mode Browser](https://en.wikipedia.org/wiki/Line_Mode_Browser "Line Mode Browser") produce only plain text for display) and other [e-text](https://en.wikipedia.org/wiki/E-text "E-text") readers.
+
+Plain text files are almost universal in programming; a source code file containing instructions in a [programming language](https://en.wikipedia.org/wiki/Programming_language "Programming language") is almost always a plain text file. Plain text is also commonly used for [configuration files](https://en.wikipedia.org/wiki/Configuration_file "Configuration file"), which are read for saved settings at the startup of a program.
+
+Plain text is used for much [e-mail](https://en.wikipedia.org/wiki/E-mail "E-mail").
+
+A [comment](https://en.wikipedia.org/wiki/Comment_\\(computer_programming\\) "Comment (computer programming)"), a "[.txt](https://en.wikipedia.org/wiki/.txt ".txt") " file, or a [TXT Record](https://en.wikipedia.org/wiki/TXT_Record "TXT Record") generally contains only plain text (without formatting) intended for humans to read.
+
+The best format for storing knowledge persistently is plain text, rather than some [binary format](https://en.wikipedia.org/wiki/Binary_format "Binary format").[^2]
+
+## Encoding
+
+### Character encodings
+
+Before the early 1960s, computers were mainly used for number-crunching rather than for text, and memory was extremely expensive. Computers often allocated only 6 bits for each character, permitting only 64 characters—assigning codes for A-Z, a-z, and 0-9 would leave only 2 codes: nowhere near enough. Most computers opted not to support lower-case letters. Thus, early text projects such as [Roberto Busa](https://en.wikipedia.org/wiki/Roberto_Busa "Roberto Busa") 's [Index Thomisticus](https://en.wikipedia.org/wiki/Index_Thomisticus "Index Thomisticus"), the [Brown Corpus](https://en.wikipedia.org/wiki/Brown_Corpus "Brown Corpus"), and others had to resort to conventions such as keying an asterisk preceding letters actually intended to be upper-case.
+
+[Fred Brooks](https://en.wikipedia.org/wiki/Fred_Brooks "Fred Brooks") of [IBM](https://en.wikipedia.org/wiki/IBM "IBM") argued strongly for going to 8-bit bytes, because someday people might want to process text, and won. Although IBM used [EBCDIC](https://en.wikipedia.org/wiki/EBCDIC "EBCDIC"), most text from then on came to be encoded in [ASCII](https://en.wikipedia.org/wiki/ASCII "ASCII"), using values from 0 to 31 for (non-printing) [control characters](https://en.wikipedia.org/wiki/Control_characters "Control characters"), and values from 32 to 127 for graphic characters such as letters, digits, and punctuation. Most machines stored characters in 8 bits rather than 7, ignoring the remaining bit or using it as a [checksum](https://en.wikipedia.org/wiki/Checksum "Checksum").
+
+The near-ubiquity of ASCII was a great help, but failed to address international and linguistic concerns. The dollar-sign ("$") was not as useful in England, and the accented characters used in Spanish, French, German, Portuguese, Italian and many other languages were entirely unavailable in ASCII (not to mention characters used in Greek, Russian, and most Eastern languages). Many individuals, companies, and countries defined extra characters as needed—often reassigning control characters, or using values in the range from 128 to 255. Using values above 128 conflicts with using the 8th bit as a checksum, but the checksum usage gradually died out.
+
+These additional characters were encoded differently in different countries, making texts impossible to decode without figuring out the originator's rules. For instance, a browser might display **¬A** rather than **\\\`** if it tried to interpret one character set as another. The International Organization for Standardization ([ISO](https://en.wikipedia.org/wiki/International_Organization_for_Standardization "International Organization for Standardization")) eventually developed several [code pages](https://en.wikipedia.org/wiki/Code_pages "Code pages") under [ISO 8859](https://en.wikipedia.org/wiki/ISO_8859 "ISO 8859"), to accommodate various languages. The first of these ([ISO 8859-1](https://en.wikipedia.org/wiki/ISO_8859-1 "ISO 8859-1")) is also known as "Latin-1", and covers the needs of most (not all) European languages that use Latin-based characters (there was not quite enough room to cover them all). [ISO 2022](https://en.wikipedia.org/wiki/ISO_2022 "ISO 2022") then provided conventions for "switching" between different character sets in mid-file. Many other organisations developed variations on these, and for many years Windows and Macintosh computers used incompatible variations.
+
+The text-encoding situation became more and more complex, leading to efforts by ISO and by the [Unicode Consortium](https://en.wikipedia.org/wiki/Unicode_Consortium "Unicode Consortium") to develop a single, unified character encoding that could cover all known (or at least all currently known) languages. After some conflict,[^3] these efforts were unified. [Unicode](https://en.wikipedia.org/wiki/Unicode "Unicode") currently allows for 1,114,112 code values, and assigns codes covering nearly all modern text writing systems, as well as many historical ones, and for many non-linguistic characters such as printer's [dingbats](https://en.wikipedia.org/wiki/Dingbat "Dingbat"), mathematical symbols, etc.
+
+Text is considered plain text regardless of its encoding. To properly understand or process it the recipient must know (or be able to figure out) what encoding was used; however, they need not know anything about the computer architecture that was used, or about the binary structures defined by whatever program (if any) created the data.
+
+Perhaps the most common way of explicitly stating the specific encoding of plain text is with a [MIME type](https://en.wikipedia.org/wiki/MIME_type "MIME type"). For email and [HTTP](https://en.wikipedia.org/wiki/HTTP "HTTP"), the default MIME type is " [text/plain](https://en.wikipedia.org/wiki/Text/plain "Text/plain") " -- plain text without markup. Another MIME type often used in both email and HTTP is " [text/html](https://en.wikipedia.org/wiki/Text/html "Text/html"); charset=UTF-8" -- plain text represented using the UTF-8 character encoding with HTML markup. Another common MIME type is "application/json" -- plain text represented using the UTF-8 character encoding with [JSON](https://en.wikipedia.org/wiki/JSON "JSON") markup.
+
+When a document is received without any explicit indication of the character encoding, some applications use [charset detection](https://en.wikipedia.org/wiki/Charset_detection "Charset detection") to attempt to guess what encoding was used.
+
+### Control codes
+
+[ASCII](https://en.wikipedia.org/wiki/ASCII "ASCII") reserves the first 32 codes (numbers 0–31 decimal) for [control characters](https://en.wikipedia.org/wiki/Control_character "Control character") known as the "C0 set": codes originally intended not to represent printable information, but rather to control devices (such as [printers](https://en.wikipedia.org/wiki/Computer_printer "Computer printer")) that make use of ASCII, or to provide [meta-information](https://en.wikipedia.org/wiki/Metadata "Metadata") about data streams such as those stored on magnetic tape. They include common characters like the [newline](https://en.wikipedia.org/wiki/Newline "Newline") and the [tab character](https://en.wikipedia.org/wiki/Tab_character "Tab character").
+
+In 8-bit character sets such as [Latin-1](https://en.wikipedia.org/wiki/ISO/IEC_8859-1 "ISO/IEC 8859-1") and the other [ISO 8859](https://en.wikipedia.org/wiki/ISO/IEC_8859 "ISO/IEC 8859") sets, the first 32 characters of the "upper half" (128 to 159) are also control codes, known as the "C1 set". They are rarely used directly; when they turn up in documents which are ostensibly in an ISO 8859 encoding, their code positions generally refer instead to the characters at that position in a proprietary, system-specific encoding, such as [Windows-1252](https://en.wikipedia.org/wiki/Windows-1252 "Windows-1252") or [Mac OS Roman](https://en.wikipedia.org/wiki/Mac_OS_Roman "Mac OS Roman"), that use the codes to instead provide additional graphic characters.
+
+[^1]: ["The Unicode Standard, version 14.0"](https://www.unicode.org/versions/Unicode14.0.0/UnicodeStandard-14.0.pdf) (PDF). pp. 18–19.
+
+[^2]: Andrew Hunt, David Thomas. " [The Pragmatic Programmer](https://en.wikipedia.org/wiki/The_Pragmatic_Programmer "The Pragmatic Programmer") ". 1999. [Chapter 14: "The Power of Plain Text"](https://books.google.com/books?id=5wBQEp6ruIAC). p. 73.
+
+[^3]: ["ISO/Unicode Merger: Ed Hart Memo"](https://www.unicode.org/history/hartmemo.html). *www.unicode.org*. Retrieved 2024-10-21."
+`;
