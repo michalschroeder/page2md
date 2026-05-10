@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test"
+import { expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
 import { Defuddle } from "defuddle/node"
 import { cleanLineNumberGutters } from "../src/clean"

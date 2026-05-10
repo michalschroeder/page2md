@@ -1,9 +1,11 @@
 IMAGE ?= page2md
 URL   ?=
 
+BUN := docker run --rm -v "$(PWD)":/app -w /app oven/bun:1-slim
+
 .DEFAULT_GOAL := help
 
-.PHONY: help build run clean install dev lockfile test lint
+.PHONY: help build run clean install dev lockfile test lint fmt actionlint tsc biome hadolint
 
 help: ## show this help
 	@awk 'BEGIN{FS=":.*##"; printf "page2md — render any URL to clean Markdown\n\ntargets:\n"} \
@@ -29,10 +31,24 @@ dev: ## run locally without Docker (URL=<url>, needs Bun)
 	bun index.ts $(URL)
 
 lockfile: ## regenerate bun.lock via Docker (no host Bun needed)
-	docker run --rm -v "$(PWD)":/app -w /app oven/bun:1-slim bun install
+	$(BUN) bun install
 
 test: ## run snapshot tests
-	docker run --rm -v "$(PWD)":/app -w /app oven/bun:1-slim bun test
+	$(BUN) bun test
 
-lint: ## validate GitHub Actions workflows with actionlint
+actionlint: ## validate GitHub Actions workflows
 	docker run --rm -v "$(PWD)":/repo -w /repo rhysd/actionlint:latest -color
+
+tsc: ## type-check via tsc --noEmit
+	$(BUN) sh -c "bun install --frozen-lockfile && bunx tsc --noEmit"
+
+biome: ## lint + format check
+	$(BUN) sh -c "bun install --frozen-lockfile && bunx biome ci ."
+
+fmt: ## auto-format with Biome
+	$(BUN) sh -c "bun install --frozen-lockfile && bunx biome check --write ."
+
+hadolint: ## lint Dockerfile
+	docker run --rm -v "$(PWD)":/repo -w /repo hadolint/hadolint:latest-alpine hadolint --failure-threshold warning Dockerfile
+
+lint: actionlint tsc biome hadolint ## run all linters

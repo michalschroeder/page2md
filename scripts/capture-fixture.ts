@@ -20,7 +20,10 @@ try {
 	)
 	const page = await ctx.newPage()
 	await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 })
-	writeFileSync(outPath, `<!-- Source: ${url} | Captured: ${new Date().toISOString()} -->\n${await page.content()}`)
+	writeFileSync(
+		outPath,
+		`<!-- Source: ${url} | Captured: ${new Date().toISOString()} -->\n${await page.content()}`,
+	)
 } finally {
 	await browser.close()
 }

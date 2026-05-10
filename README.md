@@ -67,6 +67,16 @@ bunx playwright install chromium-headless-shell
 bun index.ts <url>
 ```
 
+### Lint & test
+
+All checks run via Docker — no host installs needed:
+
+```sh
+make lint    # tsc + biome + hadolint + actionlint
+make fmt     # auto-format with Biome
+make test    # snapshot tests
+```
+
 ## License
 
 MIT — see `LICENSE`.

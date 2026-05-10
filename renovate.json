@@ -1,32 +1,32 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":semanticCommits",
-    "helpers:pinGitHubActionDigests",
-    "docker:pinDigests",
-    ":pinAllExceptPeerDependencies"
-  ],
-  "timezone": "Europe/Warsaw",
-  "schedule": ["after 8pm and before 9pm on monday"],
-  "vulnerabilityAlerts": {
-    "enabled": true,
-    "schedule": ["at any time"],
-    "labels": ["security"]
-  },
-  "packageRules": [
-    {
-      "matchManagers": ["github-actions"],
-      "groupName": "github actions"
-    },
-    {
-      "matchManagers": ["dockerfile", "docker-compose"],
-      "groupName": "docker images"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
-      "groupName": "npm non-major"
-    }
-  ]
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:recommended",
+		":semanticCommits",
+		"helpers:pinGitHubActionDigests",
+		"docker:pinDigests",
+		":pinAllExceptPeerDependencies"
+	],
+	"timezone": "Europe/Warsaw",
+	"schedule": ["after 8pm and before 9pm on monday"],
+	"vulnerabilityAlerts": {
+		"enabled": true,
+		"schedule": ["at any time"],
+		"labels": ["security"]
+	},
+	"packageRules": [
+		{
+			"matchManagers": ["github-actions"],
+			"groupName": "github actions"
+		},
+		{
+			"matchManagers": ["dockerfile", "docker-compose"],
+			"groupName": "docker images"
+		},
+		{
+			"matchManagers": ["npm"],
+			"matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+			"groupName": "npm non-major"
+		}
+	]
 }
