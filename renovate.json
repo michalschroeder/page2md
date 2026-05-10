@@ -1,7 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":semanticCommits"],
-  "schedule": ["before 6am on monday"],
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests",
+    ":pinAllExceptPeerDependencies"
+  ],
+  "timezone": "Europe/Warsaw",
+  "schedule": ["after 8pm and before 9pm on monday"],
   "vulnerabilityAlerts": {
     "enabled": true,
     "schedule": ["at any time"],
