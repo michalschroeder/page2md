@@ -26,8 +26,8 @@
     "bun": ">=1.0"
   },
   "dependencies": {
-    "defuddle": "^0.18.1",
-    "linkedom": "^0.18.12",
-    "playwright": "^1.59.1"
+    "defuddle": "0.18.1",
+    "linkedom": "0.18.12",
+    "playwright": "1.59.1"
   }
 }
