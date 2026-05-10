@@ -1,33 +1,38 @@
 {
-  "name": "page2md",
-  "version": "1.0.0",
-  "description": "Render any URL with headless Chromium and extract clean Markdown.",
-  "module": "index.ts",
-  "type": "module",
-  "license": "MIT",
-  "author": "Michal Schroeder",
-  "homepage": "https://github.com/michalschroeder/page2md",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/michalschroeder/page2md.git"
-  },
-  "bugs": {
-    "url": "https://github.com/michalschroeder/page2md/issues"
-  },
-  "keywords": [
-    "markdown",
-    "scraper",
-    "playwright",
-    "defuddle",
-    "cli",
-    "headless-chromium"
-  ],
-  "engines": {
-    "bun": ">=1.0"
-  },
-  "dependencies": {
-    "defuddle": "0.18.1",
-    "linkedom": "0.18.12",
-    "playwright": "1.59.1"
-  }
+	"name": "page2md",
+	"version": "1.0.0",
+	"description": "Render any URL with headless Chromium and extract clean Markdown.",
+	"module": "index.ts",
+	"type": "module",
+	"license": "MIT",
+	"author": "Michal Schroeder",
+	"homepage": "https://github.com/michalschroeder/page2md",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/michalschroeder/page2md.git"
+	},
+	"bugs": {
+		"url": "https://github.com/michalschroeder/page2md/issues"
+	},
+	"keywords": [
+		"markdown",
+		"scraper",
+		"playwright",
+		"defuddle",
+		"cli",
+		"headless-chromium"
+	],
+	"engines": {
+		"bun": ">=1.0"
+	},
+	"dependencies": {
+		"defuddle": "0.18.1",
+		"linkedom": "0.18.12",
+		"playwright": "1.59.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.0.0",
+		"@types/bun": "latest",
+		"typescript": "^5.9.0"
+	}
 }

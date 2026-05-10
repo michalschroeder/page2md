@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY --chown=bun:bun package.json bun.lock ./
 
+# ca-certificates is a meta-package; pinning is impractical.
+# hadolint ignore=DL3008
 RUN bun install --frozen-lockfile \
     && apt-get update && apt-get install -y --no-install-recommends ca-certificates \
     && bunx playwright install --with-deps chromium-headless-shell \

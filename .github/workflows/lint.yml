@@ -1,4 +1,4 @@
-name: Lint workflows
+name: Lint
 
 on:
   push:
@@ -20,3 +20,62 @@ jobs:
         uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
         with:
           args: -color
+
+  tsc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - id: changes
+        uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        with:
+          filters: |
+            ts:
+              - '**/*.ts'
+              - 'tsconfig.json'
+              - 'package.json'
+              - 'bun.lock'
+      - if: steps.changes.outputs.ts == 'true'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
+      - if: steps.changes.outputs.ts == 'true'
+        run: bun install --frozen-lockfile
+      - if: steps.changes.outputs.ts == 'true'
+        run: bunx tsc --noEmit
+
+  biome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - id: changes
+        uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        with:
+          filters: |
+            src:
+              - '**/*.ts'
+              - '**/*.json'
+              - 'biome.json'
+      - if: steps.changes.outputs.src == 'true'
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
+      - if: steps.changes.outputs.src == 'true'
+        run: bun install --frozen-lockfile
+      - if: steps.changes.outputs.src == 'true'
+        run: bunx biome ci .
+
+  hadolint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - id: changes
+        uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3
+        with:
+          filters: |
+            docker:
+              - 'Dockerfile'
+              - '.dockerignore'
+      - if: steps.changes.outputs.docker == 'true'
+        uses: docker://hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199
+        with:
+          args: hadolint --failure-threshold warning Dockerfile
