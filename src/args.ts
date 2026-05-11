@@ -37,7 +37,7 @@ export function parseArgs(argv: string[]): ParseResult {
 	}
 	if (!url) throw new ArgsError("URL required (see --help)")
 	const finalUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`
-	const result: ParseResult = { kind: "run", url: finalUrl, noRender }
-	if (output !== undefined) (result as { output?: string }).output = output
-	return result
+	const run: Extract<ParseResult, { kind: "run" }> = { kind: "run", url: finalUrl, noRender }
+	if (output !== undefined) run.output = output
+	return run
 }
