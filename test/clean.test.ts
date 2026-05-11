@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
 import { Defuddle } from "defuddle/node"
-import { cleanLineNumberGutters } from "../src/clean"
+import { prepareInput } from "../src/clean"
 
 const fixtures: Array<[string, string]> = [
 	["wikipedia-quicksort", "https://en.wikipedia.org/wiki/Quicksort"],
@@ -12,8 +12,7 @@ const fixtures: Array<[string, string]> = [
 for (const [name, url] of fixtures) {
 	test(`extracts ${name}`, async () => {
 		const html = readFileSync(`test/fixtures/${name}.html`, "utf8")
-		const cleaned = cleanLineNumberGutters(html)
-		const { content = "" } = await Defuddle(cleaned, url, { markdown: true })
+		const { content = "" } = await Defuddle(prepareInput(html), url, { markdown: true })
 		expect(content).toMatchSnapshot()
 	})
 }
