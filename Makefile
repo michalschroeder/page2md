@@ -5,7 +5,7 @@ BUN := docker run --rm -v "$(PWD)":/app -w /app oven/bun:1-slim
 
 .DEFAULT_GOAL := help
 
-.PHONY: help build run clean install dev lockfile test lint fmt actionlint tsc biome hadolint
+.PHONY: help build run clean install dev lockfile test lint fmt actionlint tsc biome hadolint token-comparison
 
 help: ## show this help
 	@awk 'BEGIN{FS=":.*##"; printf "page2md — render any URL to clean Markdown\n\ntargets:\n"} \
@@ -52,3 +52,17 @@ hadolint: ## lint Dockerfile
 	docker run --rm -v "$(PWD)":/repo -w /repo hadolint/hadolint:latest-alpine hadolint --failure-threshold warning Dockerfile
 
 lint: actionlint tsc biome hadolint ## run all linters
+
+TOKEN_CMP_RUN = docker run --init --rm \
+	-v "$(PWD)/scripts":/app/scripts:ro \
+	-v "$(PWD)/docs":/app/docs \
+	-v "$(PWD)/README.md":/app/README.md \
+	--entrypoint bun \
+	$(IMAGE) /app/scripts/token-comparison.ts
+
+token-comparison: build ## regenerate docs/token-comparison/ + README.md table
+	mkdir -p docs/token-comparison
+	$(TOKEN_CMP_RUN)
+
+token-comparison-readme: build ## regenerate only the README.md table
+	$(TOKEN_CMP_RUN) --readme-only
