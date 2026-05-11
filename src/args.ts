@@ -12,9 +12,9 @@ export class ArgsError extends Error {
 	}
 }
 
-function requireNonEmptyUa(value: string | undefined): string {
+function requireNonEmpty(flag: string, value: string | undefined): string {
 	if (value === undefined || value.trim() === "") {
-		throw new ArgsError("--user-agent requires a non-empty value")
+		throw new ArgsError(`${flag} requires a non-empty value`)
 	}
 	return value
 }
@@ -29,11 +29,11 @@ export function parseArgs(argv: string[]): ParseResult {
 		if (a === "-h" || a === "--help") return { kind: "help" }
 		if (a === "-V" || a === "--version") return { kind: "version" }
 		if (a === "-o" || a === "--output") {
-			output = argv[++i]
+			output = requireNonEmpty(a, argv[++i])
 			continue
 		}
 		if (a.startsWith("--output=")) {
-			output = a.slice(9)
+			output = requireNonEmpty("--output", a.slice(9))
 			continue
 		}
 		if (a === "--no-render") {
@@ -41,11 +41,11 @@ export function parseArgs(argv: string[]): ParseResult {
 			continue
 		}
 		if (a === "--user-agent") {
-			userAgent = requireNonEmptyUa(argv[++i])
+			userAgent = requireNonEmpty("--user-agent", argv[++i])
 			continue
 		}
 		if (a.startsWith("--user-agent=")) {
-			userAgent = requireNonEmptyUa(a.slice("--user-agent=".length))
+			userAgent = requireNonEmpty("--user-agent", a.slice("--user-agent=".length))
 			continue
 		}
 		if (a.startsWith("-")) throw new ArgsError(`unknown option: ${a}`)
