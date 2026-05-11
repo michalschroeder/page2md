@@ -19,6 +19,13 @@ function requireNonEmpty(flag: string, value: string | undefined): string {
 	return value
 }
 
+function requireValue(flag: string, value: string | undefined): string {
+	if (value === undefined || value.startsWith("-")) {
+		throw new ArgsError(`${flag} requires a value`)
+	}
+	return value
+}
+
 export function parseArgs(argv: string[]): ParseResult {
 	let url: string | undefined
 	let output: string | undefined
@@ -29,7 +36,7 @@ export function parseArgs(argv: string[]): ParseResult {
 		if (a === "-h" || a === "--help") return { kind: "help" }
 		if (a === "-V" || a === "--version") return { kind: "version" }
 		if (a === "-o" || a === "--output") {
-			output = requireNonEmpty(a, argv[++i])
+			output = requireValue(a, requireNonEmpty(a, argv[++i]))
 			continue
 		}
 		if (a.startsWith("--output=")) {
@@ -41,7 +48,7 @@ export function parseArgs(argv: string[]): ParseResult {
 			continue
 		}
 		if (a === "--user-agent") {
-			userAgent = requireNonEmpty("--user-agent", argv[++i])
+			userAgent = requireValue(a, requireNonEmpty(a, argv[++i]))
 			continue
 		}
 		if (a.startsWith("--user-agent=")) {
