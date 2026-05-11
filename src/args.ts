@@ -1,7 +1,16 @@
 export type ParseResult =
-	| { kind: "run"; url: string; output?: string; noRender: boolean; userAgent?: string }
+	| {
+			kind: "run"
+			url: string
+			output?: string
+			noRender: boolean
+			userAgent?: string
+			timeoutMs?: number
+	  }
 	| { kind: "help" }
 	| { kind: "version" }
+
+export const TIMEOUT_MAX_MS = 300_000
 
 export class ArgsError extends Error {
 	exitCode: number
@@ -26,11 +35,26 @@ function requireValue(flag: string, value: string | undefined): string {
 	return value
 }
 
+function parseTimeoutMs(value: string | undefined): number {
+	if (value === undefined || value.trim() === "") {
+		throw new ArgsError("--timeout requires a value in milliseconds")
+	}
+	if (!/^\d+$/.test(value.trim())) {
+		throw new ArgsError(`--timeout must be a positive integer in milliseconds, got: ${value}`)
+	}
+	const n = Number(value)
+	if (n < 1 || n > TIMEOUT_MAX_MS) {
+		throw new ArgsError(`--timeout must be between 1 and ${TIMEOUT_MAX_MS} ms, got: ${n}`)
+	}
+	return n
+}
+
 export function parseArgs(argv: string[]): ParseResult {
 	let url: string | undefined
 	let output: string | undefined
 	let noRender = false
 	let userAgent: string | undefined
+	let timeoutMs: number | undefined
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i]
 		if (a === "-h" || a === "--help") return { kind: "help" }
@@ -55,6 +79,14 @@ export function parseArgs(argv: string[]): ParseResult {
 			userAgent = requireNonEmpty("--user-agent", a.slice("--user-agent=".length))
 			continue
 		}
+		if (a === "--timeout") {
+			timeoutMs = parseTimeoutMs(argv[++i])
+			continue
+		}
+		if (a.startsWith("--timeout=")) {
+			timeoutMs = parseTimeoutMs(a.slice("--timeout=".length))
+			continue
+		}
 		if (a.startsWith("-")) throw new ArgsError(`unknown option: ${a}`)
 		url = a
 	}
@@ -63,5 +95,6 @@ export function parseArgs(argv: string[]): ParseResult {
 	const run: Extract<ParseResult, { kind: "run" }> = { kind: "run", url: finalUrl, noRender }
 	if (output !== undefined) run.output = output
 	if (userAgent !== undefined) run.userAgent = userAgent
+	if (timeoutMs !== undefined) run.timeoutMs = timeoutMs
 	return run
 }

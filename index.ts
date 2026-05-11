@@ -8,7 +8,7 @@ import { cleanLineNumberGutters } from "./src/clean"
 import { DEFAULT_UA, fetchStaticHtml } from "./src/fetch-static"
 
 const SKIP_RESOURCES = new Set(["image", "font", "media", "stylesheet"])
-const NAV_TIMEOUT = 30_000
+const DEFAULT_TIMEOUT_MS = 30_000
 const VERSION = pkg.version
 
 const errMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err))
@@ -22,6 +22,7 @@ Options:
   -o, --output <file>     write markdown to file instead of stdout
       --no-render         skip Chromium; fetch HTML directly (fast, static pages only)
       --user-agent <ua>   override User-Agent header (both modes)
+      --timeout <ms>      page-load timeout in ms (1–300000, default 30000)
   -h, --help              show this help
   -V, --version           show version
 
@@ -52,15 +53,16 @@ if (parsed.kind === "version") {
 	process.exit(0)
 }
 
-const { url, output, noRender, userAgent } = parsed
+const { url, output, noRender, userAgent, timeoutMs } = parsed
 const ua = userAgent ?? DEFAULT_UA
+const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
 
 let browser: Browser | undefined
 let html: string
 try {
 	if (noRender) {
 		try {
-			html = await fetchStaticHtml(url, NAV_TIMEOUT, ua)
+			html = await fetchStaticHtml(url, timeout, ua)
 		} catch (err) {
 			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
 			process.exit(2)
@@ -71,7 +73,7 @@ try {
 			args: ["--disable-dev-shm-usage", "--no-sandbox"],
 		})
 		try {
-			html = await fetchRenderedHtml(browser, url, ua)
+			html = await fetchRenderedHtml(browser, url, ua, timeout)
 		} catch (err) {
 			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
 			process.exit(2)
@@ -94,7 +96,12 @@ try {
 	await browser?.close()
 }
 
-async function fetchRenderedHtml(browser: Browser, url: string, userAgent: string) {
+async function fetchRenderedHtml(
+	browser: Browser,
+	url: string,
+	userAgent: string,
+	timeoutMs: number,
+) {
 	const ctx = await browser.newContext({
 		javaScriptEnabled: true,
 		bypassCSP: true,
@@ -104,6 +111,6 @@ async function fetchRenderedHtml(browser: Browser, url: string, userAgent: strin
 		SKIP_RESOURCES.has(route.request().resourceType()) ? route.abort() : route.continue(),
 	)
 	const page = await ctx.newPage()
-	await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT })
+	await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs })
 	return cleanLineNumberGutters(await page.content())
 }
