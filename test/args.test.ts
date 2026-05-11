@@ -64,6 +64,46 @@ test("throws ArgsError on unknown flag", () => {
 	}
 })
 
+test("throws on -o with no value", () => {
+	try {
+		parseArgs(["-o"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/-o requires a non-empty value/)
+	}
+})
+
+test("throws on empty -o value", () => {
+	try {
+		parseArgs(["-o", "", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/-o requires a non-empty value/)
+	}
+})
+
+test("throws on empty --output=value", () => {
+	try {
+		parseArgs(["--output=", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--output requires a non-empty value/)
+	}
+})
+
+test("throws on whitespace-only --output=value", () => {
+	try {
+		parseArgs(["--output=   ", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--output requires a non-empty value/)
+	}
+})
+
 test("parses --user-agent value", () => {
 	const r = parseArgs(["--user-agent", "foo/1.0", "example.com"])
 	expect(r).toEqual({
