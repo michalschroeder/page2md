@@ -76,6 +76,6 @@ jobs:
               - 'Dockerfile'
               - '.dockerignore'
       - if: steps.changes.outputs.docker == 'true'
-        uses: docker://hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199
+        uses: docker://hadolint/hadolint:v2.14.0-alpine@sha256:7aba693c1442eb31c0b015c129697cb3b6cb7da589d85c7562f9deb435a6657c
         with:
           args: hadolint --failure-threshold warning Dockerfile
