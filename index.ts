@@ -5,7 +5,7 @@ import { type Browser, chromium } from "playwright"
 import pkg from "./package.json" with { type: "json" }
 import { ArgsError, parseArgs } from "./src/args"
 import { cleanLineNumberGutters } from "./src/clean"
-import { fetchStaticHtml } from "./src/fetch-static"
+import { DEFAULT_UA, fetchStaticHtml } from "./src/fetch-static"
 
 const SKIP_RESOURCES = new Set(["image", "font", "media", "stylesheet"])
 const NAV_TIMEOUT = 30_000
@@ -19,15 +19,17 @@ Usage:
   page2md [options] <url>
 
 Options:
-  -o, --output <file>    write markdown to file instead of stdout
-      --no-render        skip Chromium; fetch HTML directly (fast, static pages only)
-  -h, --help             show this help
-  -V, --version          show version
+  -o, --output <file>     write markdown to file instead of stdout
+      --no-render         skip Chromium; fetch HTML directly (fast, static pages only)
+      --user-agent <ua>   override User-Agent header (both modes)
+  -h, --help              show this help
+  -V, --version           show version
 
 Examples:
   page2md example.com
   page2md -o page.md https://example.com
   page2md --no-render https://en.wikipedia.org/wiki/Quicksort
+  page2md --user-agent "Mozilla/5.0 (compatible; mybot/1.0)" example.com
 `
 
 let parsed: ReturnType<typeof parseArgs>
@@ -50,14 +52,15 @@ if (parsed.kind === "version") {
 	process.exit(0)
 }
 
-const { url, output, noRender } = parsed
+const { url, output, noRender, userAgent } = parsed
+const ua = userAgent ?? DEFAULT_UA
 
 let browser: Browser | undefined
 let html: string
 try {
 	if (noRender) {
 		try {
-			html = await fetchStaticHtml(url, NAV_TIMEOUT)
+			html = await fetchStaticHtml(url, NAV_TIMEOUT, ua)
 		} catch (err) {
 			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
 			process.exit(2)
@@ -68,7 +71,7 @@ try {
 			args: ["--disable-dev-shm-usage", "--no-sandbox"],
 		})
 		try {
-			html = await fetchRenderedHtml(browser, url)
+			html = await fetchRenderedHtml(browser, url, ua)
 		} catch (err) {
 			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
 			process.exit(2)
@@ -91,8 +94,12 @@ try {
 	await browser?.close()
 }
 
-async function fetchRenderedHtml(browser: Browser, url: string) {
-	const ctx = await browser.newContext({ javaScriptEnabled: true, bypassCSP: true })
+async function fetchRenderedHtml(browser: Browser, url: string, userAgent: string) {
+	const ctx = await browser.newContext({
+		javaScriptEnabled: true,
+		bypassCSP: true,
+		userAgent,
+	})
 	await ctx.route("**/*", (route) =>
 		SKIP_RESOURCES.has(route.request().resourceType()) ? route.abort() : route.continue(),
 	)
