@@ -184,3 +184,88 @@ test("throws on --user-agent consuming a flag-like value", () => {
 		expect((e as ArgsError).message).toMatch(/--user-agent requires a value/)
 	}
 })
+
+test("parses --timeout value", () => {
+	const r = parseArgs(["--timeout", "5000", "example.com"])
+	expect(r).toEqual({
+		kind: "run",
+		url: "https://example.com",
+		noRender: false,
+		timeoutMs: 5000,
+	})
+})
+
+test("parses --timeout=value", () => {
+	const r = parseArgs(["--timeout=5000", "example.com"])
+	expect(r).toEqual({
+		kind: "run",
+		url: "https://example.com",
+		noRender: false,
+		timeoutMs: 5000,
+	})
+})
+
+test("accepts --timeout at max (300000)", () => {
+	const r = parseArgs(["--timeout=300000", "example.com"])
+	expect(r).toMatchObject({ kind: "run", timeoutMs: 300000 })
+})
+
+test("throws on --timeout with no value", () => {
+	try {
+		parseArgs(["--timeout"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--timeout requires a value/)
+	}
+})
+
+test("throws on non-numeric --timeout", () => {
+	try {
+		parseArgs(["--timeout=abc", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/positive integer/)
+	}
+})
+
+test("throws on fractional --timeout", () => {
+	try {
+		parseArgs(["--timeout=1.5", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/positive integer/)
+	}
+})
+
+test("throws on --timeout=0", () => {
+	try {
+		parseArgs(["--timeout=0", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/between 1 and 300000/)
+	}
+})
+
+test("throws on negative --timeout", () => {
+	try {
+		parseArgs(["--timeout=-1", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/positive integer/)
+	}
+})
+
+test("throws on --timeout above max", () => {
+	try {
+		parseArgs(["--timeout=300001", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/between 1 and 300000/)
+	}
+})
