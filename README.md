@@ -48,6 +48,30 @@ Nushell:
 def page2md [url: string] { docker run --rm page2md $url }
 ```
 
+## Token savings
+
+Feeding raw HTML to an LLM burns tokens on tags, scripts, and chrome. page2md hands the model just the article.
+
+<!-- token-comparison:start -->
+
+Across 8 pages, page2md output is **19.0× smaller** than rendered HTML in tokens (95% savings, `cl100k_base`).
+
+| Page | Rendered HTML | page2md MD | Savings |
+| --- | ---: | ---: | ---: |
+| example.com | 153 | 29 | 81% |
+| Wikipedia article | 114,260 | 20,322 | 82% |
+| Hacker News front page | 11,786 | 2,157 | 82% |
+| MDN reference page | 26,338 | 2,775 | 89% |
+| GitHub repo README | 136,180 | 1,042 | 99% |
+| React docs page | 152,456 | 6,251 | 96% |
+| Personal blog post | 30,209 | 1,713 | 94% |
+| Stack Overflow Q&A | 269,495 | 4,727 | 98% |
+| **Total** | **740,877** | **39,016** | **95%** |
+
+<!-- token-comparison:end -->
+
+Full numbers and method: [docs/token-comparison/](docs/token-comparison/README.md).
+
 ## How it works
 
 1. Open the page in headless Chromium. Skip images, fonts, video, CSS.
