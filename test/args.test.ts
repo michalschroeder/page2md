@@ -130,7 +130,7 @@ test("throws on --user-agent with no value", () => {
 		throw new Error("expected throw")
 	} catch (e) {
 		expect(e).toBeInstanceOf(ArgsError)
-		expect((e as ArgsError).message).toMatch(/--user-agent requires a non-empty value/)
+		expect((e as ArgsError).message).toMatch(/--user-agent requires a value/)
 	}
 })
 
@@ -151,5 +151,36 @@ test("throws on whitespace-only --user-agent=value", () => {
 	} catch (e) {
 		expect(e).toBeInstanceOf(ArgsError)
 		expect((e as ArgsError).message).toMatch(/--user-agent requires a non-empty value/)
+	}
+})
+
+test("throws on -o consuming a flag-like value", () => {
+	try {
+		parseArgs(["-o", "--no-render", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).exitCode).toBe(1)
+		expect((e as ArgsError).message).toMatch(/-o\/--output requires a value/)
+	}
+})
+
+test("throws on --output consuming a flag-like value", () => {
+	try {
+		parseArgs(["--output", "--foo", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/-o\/--output requires a value/)
+	}
+})
+
+test("throws on --user-agent consuming a flag-like value", () => {
+	try {
+		parseArgs(["--user-agent", "--no-render", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--user-agent requires a value/)
 	}
 })
