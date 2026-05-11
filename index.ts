@@ -4,7 +4,7 @@ import { Defuddle } from "defuddle/node"
 import { type Browser, chromium } from "playwright"
 import pkg from "./package.json" with { type: "json" }
 import { ArgsError, parseArgs } from "./src/args"
-import { cleanLineNumberGutters } from "./src/clean"
+import { prepareInput } from "./src/clean"
 import { DEFAULT_UA, fetchStaticHtml } from "./src/fetch-static"
 
 const SKIP_RESOURCES = new Set(["image", "font", "media", "stylesheet"])
@@ -58,11 +58,11 @@ const ua = userAgent ?? DEFAULT_UA
 const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
 
 let browser: Browser | undefined
-let html: string
+let input: Document | string
 try {
 	if (noRender) {
 		try {
-			html = await fetchStaticHtml(url, timeout, ua)
+			input = await fetchStaticHtml(url, timeout, ua)
 		} catch (err) {
 			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
 			process.exit(2)
@@ -73,7 +73,7 @@ try {
 			args: ["--disable-dev-shm-usage", "--no-sandbox"],
 		})
 		try {
-			html = await fetchRenderedHtml(browser, url, ua, timeout)
+			input = await fetchRenderedHtml(browser, url, ua, timeout)
 		} catch (err) {
 			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
 			process.exit(2)
@@ -81,7 +81,7 @@ try {
 	}
 
 	try {
-		const { content = "" } = await Defuddle(html, url, { markdown: true })
+		const { content = "" } = await Defuddle(input, url, { markdown: true })
 		if (!content) {
 			console.error(`error: extracted no content from ${url}`)
 			process.exit(3)
@@ -112,5 +112,5 @@ async function fetchRenderedHtml(
 	)
 	const page = await ctx.newPage()
 	await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs })
-	return cleanLineNumberGutters(await page.content())
+	return prepareInput(await page.content())
 }

@@ -1,4 +1,4 @@
-import { cleanLineNumberGutters } from "./clean"
+import { prepareInput } from "./clean"
 
 export const DEFAULT_UA =
 	"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
@@ -9,7 +9,7 @@ export async function fetchStaticHtml(
 	url: string,
 	timeoutMs: number,
 	userAgent: string,
-): Promise<string> {
+): Promise<Document | string> {
 	const ctrl = new AbortController()
 	const timer = setTimeout(() => ctrl.abort(), timeoutMs)
 	try {
@@ -23,7 +23,7 @@ export async function fetchStaticHtml(
 		if (!HTML_TYPES.some((t) => ct.startsWith(t))) {
 			throw new Error(`unexpected content-type: ${ct || "(none)"}`)
 		}
-		return cleanLineNumberGutters(await res.text())
+		return prepareInput(await res.text())
 	} finally {
 		clearTimeout(timer)
 	}

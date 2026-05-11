@@ -1,6 +1,10 @@
 import { parseHTML } from "linkedom"
 
-export function cleanLineNumberGutters(html: string): string {
+const JSON_LD_MARKER = "application/ld+json"
+
+export function prepareInput(html: string): Document | string {
+	if (!html.includes("<pre") && !html.includes(JSON_LD_MARKER)) return html
+
 	const { document } = parseHTML(html)
 
 	const isLineNumberGutter = (el: Element) => {
@@ -16,7 +20,7 @@ export function cleanLineNumberGutters(html: string): string {
 
 	cleanPres(document)
 
-	for (const script of document.querySelectorAll('script[type="application/ld+json"]')) {
+	for (const script of document.querySelectorAll(`script[type="${JSON_LD_MARKER}"]`)) {
 		try {
 			const data = JSON.parse(script.textContent || "")
 			const visit = (node: unknown): void => {
@@ -40,5 +44,5 @@ export function cleanLineNumberGutters(html: string): string {
 		}
 	}
 
-	return document.toString()
+	return document
 }
