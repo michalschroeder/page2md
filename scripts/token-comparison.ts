@@ -4,7 +4,7 @@ import { dirname } from "node:path"
 import { Defuddle } from "defuddle/node"
 import { getEncoding } from "js-tiktoken"
 import { type Browser, chromium } from "playwright"
-import { cleanLineNumberGutters } from "../src/clean"
+import { prepareInput } from "../src/clean"
 import { DEFAULT_UA, fetchStaticHtml } from "../src/fetch-static"
 
 const NAV_TIMEOUT = 30_000
@@ -20,13 +20,13 @@ const TARGETS: Target[] = [
 		label: "MDN reference page",
 		url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map",
 	},
-	{ label: "GitHub repo README", url: "https://github.com/microsoft/TypeScript" },
 	{ label: "React docs page", url: "https://react.dev/reference/react/useState" },
 	{ label: "Personal blog post", url: "https://overreacted.io/before-you-memo/" },
 	{
 		label: "Stack Overflow Q&A",
 		url: "https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python",
 	},
+	{ label: "page2md GH repo", url: "https://github.com/michalschroeder/page2md" }
 ]
 
 const OUT = "docs/token-comparison/README.md"
@@ -49,15 +49,16 @@ type Row = {
 const enc = getEncoding("cl100k_base")
 const countTokens = (s: string): number => enc.encode(s).length
 const byteLen = (s: string): number => Buffer.byteLength(s, "utf8")
-const fmt = (n: number | null): string => (n == null ? "—" : n.toLocaleString("en-US"))
+const ERR = "_error_"
+const fmt = (n: number | null): string => (n == null ? ERR : n.toLocaleString("en-US"))
 const kb = (n: number | null): string =>
-	n == null ? "—" : `${Math.round(n / 1024).toLocaleString("en-US")}`
+	n == null ? ERR : `${Math.round(n / 1024).toLocaleString("en-US")}`
 const ratio = (small: number | null, big: number | null, suffix = ""): string => {
-	if (!small || !big) return "—"
+	if (!small || !big) return ERR
 	return `${(big / small).toFixed(1)}×${suffix ? ` ${suffix}` : ""}`
 }
 const pct = (small: number | null, big: number | null): string => {
-	if (!small || !big) return "—"
+	if (!small || !big) return ERR
 	return `${Math.round((1 - small / big) * 100)}%`
 }
 
@@ -69,7 +70,8 @@ async function fetchRendered(browser: Browser, url: string, ua: string): Promise
 	const page = await ctx.newPage()
 	try {
 		await page.goto(url, { waitUntil: "domcontentloaded", timeout: NAV_TIMEOUT })
-		return cleanLineNumberGutters(await page.content())
+		const prepared = prepareInput(await page.content())
+		return typeof prepared === "string" ? prepared : prepared.documentElement.outerHTML
 	} finally {
 		await ctx.close()
 	}
@@ -87,7 +89,8 @@ async function measure(browser: Browser, t: Target): Promise<Row> {
 		markdownBytes: null,
 	}
 	try {
-		const raw = await fetchStaticHtml(t.url, NAV_TIMEOUT, DEFAULT_UA)
+		const fetched = await fetchStaticHtml(t.url, NAV_TIMEOUT, DEFAULT_UA)
+		const raw = typeof fetched === "string" ? fetched : fetched.documentElement.outerHTML
 		row.rawBytes = byteLen(raw)
 		row.rawTokens = countTokens(raw)
 	} catch (e) {
@@ -230,16 +233,24 @@ const browser = await chromium.launch({
 	channel: "chromium-headless-shell",
 	args: ["--disable-dev-shm-usage", "--no-sandbox"],
 })
-const rows: Row[] = []
+const CONCURRENCY = 3
+const rows: Row[] = new Array(TARGETS.length)
 try {
-	for (const t of TARGETS) {
-		process.stderr.write(`measuring ${t.label} … `)
-		const row = await measure(browser, t)
-		rows.push(row)
-		process.stderr.write(
-			`raw=${fmt(row.rawTokens)} rendered=${fmt(row.renderedTokens)} md=${fmt(row.markdownTokens)}${row.error ? ` (${row.error})` : ""}\n`,
-		)
+	let next = 0
+	const worker = async () => {
+		while (true) {
+			const i = next++
+			if (i >= TARGETS.length) return
+			const t = TARGETS[i]
+			process.stderr.write(`→ ${t.label}\n`)
+			const row = await measure(browser, t)
+			rows[i] = row
+			process.stderr.write(
+				`✓ ${t.label}: raw=${fmt(row.rawTokens)} rendered=${fmt(row.renderedTokens)} md=${fmt(row.markdownTokens)}${row.error ? ` (${row.error})` : ""}\n`,
+			)
+		}
 	}
+	await Promise.all(Array.from({ length: CONCURRENCY }, worker))
 } finally {
 	await browser.close()
 }

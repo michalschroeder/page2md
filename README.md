@@ -23,6 +23,7 @@ Many pages need JS to render. `curl | defuddle` misses SPA content. page2md runs
 - **Feeding pages to an LLM** — Markdown is ~19× smaller than rendered HTML (see [Token savings](#token-savings)), and the model sees content, not chrome.
 - **Archiving / note-taking** — clean, diff-able Markdown for Obsidian, Logseq, git.
 - **Scraping pipelines** — deterministic output, no AI in the loop, no hallucinated content.
+- **Bot-blocked pages** — sites that 403 a plain `fetch`/`curl` (Stack Overflow, GitHub at times) render fine here because page2md uses a real browser.
 
 ### vs. alternatives
 
@@ -80,14 +81,14 @@ Across 8 pages, page2md output is **19.0× smaller** than rendered HTML in token
 | Page | Rendered HTML | page2md MD | Savings |
 | --- | ---: | ---: | ---: |
 | example.com | 153 | 29 | 81% |
-| Wikipedia article | 114,260 | 20,322 | 82% |
-| Hacker News front page | 11,786 | 2,157 | 82% |
-| MDN reference page | 26,338 | 2,775 | 89% |
-| GitHub repo README | 136,180 | 1,042 | 99% |
-| React docs page | 152,456 | 6,251 | 96% |
-| Personal blog post | 30,209 | 1,713 | 94% |
-| Stack Overflow Q&A | 269,495 | 4,727 | 98% |
-| **Total** | **740,877** | **39,016** | **95%** |
+| Wikipedia article | 114,256 | 20,322 | 82% |
+| Hacker News front page | 11,822 | 2,141 | 82% |
+| MDN reference page | 26,334 | 2,775 | 89% |
+| React docs page | 152,452 | 6,251 | 96% |
+| Personal blog post | 30,205 | 1,713 | 94% |
+| Stack Overflow Q&A | 269,576 | 4,727 | 98% |
+| page2md GH repo | 138,992 | 1,254 | 99% |
+| **Total** | **743,790** | **39,212** | **95%** |
 
 <!-- token-comparison:end -->
 
