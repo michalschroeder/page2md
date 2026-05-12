@@ -26,7 +26,7 @@ const TARGETS: Target[] = [
 		label: "Stack Overflow Q&A",
 		url: "https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python",
 	},
-	{ label: "page2md GH repo", url: "https://github.com/michalschroeder/page2md" }
+	{ label: "page2md GH repo", url: "https://github.com/michalschroeder/page2md" },
 ]
 
 const OUT = "docs/token-comparison/README.md"
