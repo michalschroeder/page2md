@@ -20,7 +20,8 @@ Usage:
 
 Options:
   -o, --output <file>     write markdown to file instead of stdout
-      --no-render         skip Chromium; fetch HTML directly (fast, static pages only)
+      --no-render         skip Chromium; plain HTTP fetch, no JS (static pages only)
+      --externals         enrich third-party embeds via network (Twitter/YouTube/Reddit); off by default
       --user-agent <ua>   override User-Agent header (both modes)
       --timeout <ms>      page-load timeout in ms (1–300000, default 30000)
   -h, --help              show this help
@@ -53,7 +54,7 @@ if (parsed.kind === "version") {
 	process.exit(0)
 }
 
-const { url, output, noRender, userAgent, timeoutMs } = parsed
+const { url, output, noRender, externals, userAgent, timeoutMs } = parsed
 const ua = userAgent ?? DEFAULT_UA
 const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
 
@@ -81,7 +82,7 @@ try {
 	}
 
 	try {
-		const { content = "" } = await Defuddle(input, url, { markdown: true })
+		const { content = "" } = await Defuddle(input, url, { markdown: true, useAsync: externals })
 		if (!content) {
 			console.error(`error: extracted no content from ${url}`)
 			process.exit(3)
