@@ -3,27 +3,49 @@ import { ArgsError, parseArgs } from "../src/args"
 
 test("returns run with url and https scheme prepended", () => {
 	const r = parseArgs(["example.com"])
-	expect(r).toEqual({ kind: "run", url: "https://example.com", noRender: false })
+	expect(r).toEqual({
+		kind: "run",
+		url: "https://example.com",
+		noRender: false,
+		externals: false,
+	})
 })
 
 test("preserves explicit http scheme", () => {
 	const r = parseArgs(["http://example.com"])
-	expect(r).toEqual({ kind: "run", url: "http://example.com", noRender: false })
+	expect(r).toEqual({ kind: "run", url: "http://example.com", noRender: false, externals: false })
 })
 
 test("parses -o output", () => {
 	const r = parseArgs(["-o", "out.md", "example.com"])
-	expect(r).toEqual({ kind: "run", url: "https://example.com", output: "out.md", noRender: false })
+	expect(r).toEqual({
+		kind: "run",
+		url: "https://example.com",
+		output: "out.md",
+		noRender: false,
+		externals: false,
+	})
 })
 
 test("parses --output=foo", () => {
 	const r = parseArgs(["--output=out.md", "example.com"])
-	expect(r).toEqual({ kind: "run", url: "https://example.com", output: "out.md", noRender: false })
+	expect(r).toEqual({
+		kind: "run",
+		url: "https://example.com",
+		output: "out.md",
+		noRender: false,
+		externals: false,
+	})
 })
 
 test("parses --no-render", () => {
 	const r = parseArgs(["--no-render", "example.com"])
-	expect(r).toEqual({ kind: "run", url: "https://example.com", noRender: true })
+	expect(r).toEqual({ kind: "run", url: "https://example.com", noRender: true, externals: false })
+})
+
+test("parses --externals", () => {
+	const r = parseArgs(["--externals", "example.com"])
+	expect(r).toEqual({ kind: "run", url: "https://example.com", noRender: false, externals: true })
 })
 
 test("returns help for -h", () => {
@@ -110,6 +132,7 @@ test("parses --user-agent value", () => {
 		kind: "run",
 		url: "https://example.com",
 		noRender: false,
+		externals: false,
 		userAgent: "foo/1.0",
 	})
 })
@@ -120,6 +143,7 @@ test("parses --user-agent=value", () => {
 		kind: "run",
 		url: "https://example.com",
 		noRender: false,
+		externals: false,
 		userAgent: "foo/1.0",
 	})
 })
@@ -191,6 +215,7 @@ test("parses --timeout value", () => {
 		kind: "run",
 		url: "https://example.com",
 		noRender: false,
+		externals: false,
 		timeoutMs: 5000,
 	})
 })
@@ -201,6 +226,7 @@ test("parses --timeout=value", () => {
 		kind: "run",
 		url: "https://example.com",
 		noRender: false,
+		externals: false,
 		timeoutMs: 5000,
 	})
 })

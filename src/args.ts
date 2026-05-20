@@ -4,6 +4,7 @@ export type ParseResult =
 			url: string
 			output?: string
 			noRender: boolean
+			externals: boolean
 			userAgent?: string
 			timeoutMs?: number
 	  }
@@ -53,6 +54,7 @@ export function parseArgs(argv: string[]): ParseResult {
 	let url: string | undefined
 	let output: string | undefined
 	let noRender = false
+	let externals = false
 	let userAgent: string | undefined
 	let timeoutMs: number | undefined
 	for (let i = 0; i < argv.length; i++) {
@@ -69,6 +71,10 @@ export function parseArgs(argv: string[]): ParseResult {
 		}
 		if (a === "--no-render") {
 			noRender = true
+			continue
+		}
+		if (a === "--externals") {
+			externals = true
 			continue
 		}
 		if (a === "--user-agent") {
@@ -92,7 +98,12 @@ export function parseArgs(argv: string[]): ParseResult {
 	}
 	if (!url) throw new ArgsError("URL required (see --help)")
 	const finalUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`
-	const run: Extract<ParseResult, { kind: "run" }> = { kind: "run", url: finalUrl, noRender }
+	const run: Extract<ParseResult, { kind: "run" }> = {
+		kind: "run",
+		url: finalUrl,
+		noRender,
+		externals,
+	}
 	if (output !== undefined) run.output = output
 	if (userAgent !== undefined) run.userAgent = userAgent
 	if (timeoutMs !== undefined) run.timeoutMs = timeoutMs
