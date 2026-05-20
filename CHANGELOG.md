@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/michalschroeder/page2md/compare/v1.1.0...v1.1.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* **token-comparison:** repair import, parallelize, label errors ([#39](https://github.com/michalschroeder/page2md/issues/39)) ([d504a74](https://github.com/michalschroeder/page2md/commit/d504a7479e518b0a9e41a2707a4530f803f5e953))
+
 ## [1.1.0](https://github.com/michalschroeder/page2md/compare/v1.0.0...v1.1.0) (2026-05-11)
 
 
