@@ -5,6 +5,7 @@ export type ParseResult =
 			output?: string
 			noRender: boolean
 			externals: boolean
+			json: boolean
 			userAgent?: string
 			timeoutMs?: number
 	  }
@@ -55,6 +56,7 @@ export function parseArgs(argv: string[]): ParseResult {
 	let output: string | undefined
 	let noRender = false
 	let externals = false
+	let json = false
 	let userAgent: string | undefined
 	let timeoutMs: number | undefined
 	for (let i = 0; i < argv.length; i++) {
@@ -75,6 +77,10 @@ export function parseArgs(argv: string[]): ParseResult {
 		}
 		if (a === "--externals") {
 			externals = true
+			continue
+		}
+		if (a === "-j" || a === "--json") {
+			json = true
 			continue
 		}
 		if (a === "--user-agent") {
@@ -103,6 +109,7 @@ export function parseArgs(argv: string[]): ParseResult {
 		url: finalUrl,
 		noRender,
 		externals,
+		json,
 	}
 	if (output !== undefined) run.output = output
 	if (userAgent !== undefined) run.userAgent = userAgent
