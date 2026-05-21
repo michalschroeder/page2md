@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.0](https://github.com/michalschroeder/page2md/compare/v1.1.1...v1.2.0) (2026-05-21)
+
+
+### Features
+
+* add --externals flag, default useAsync: false ([#48](https://github.com/michalschroeder/page2md/issues/48)) ([5989f24](https://github.com/michalschroeder/page2md/commit/5989f24f15754eeaac44e865216e707b966a56ba)), closes [#47](https://github.com/michalschroeder/page2md/issues/47)
+* add --json/-j flag for full Defuddle result ([#50](https://github.com/michalschroeder/page2md/issues/50)) ([5f4979c](https://github.com/michalschroeder/page2md/commit/5f4979c3bdeec11c443cf58aa995691dac8a8e20)), closes [#45](https://github.com/michalschroeder/page2md/issues/45)
+* add --property/-p flag to extract single field ([#46](https://github.com/michalschroeder/page2md/issues/46)) ([#51](https://github.com/michalschroeder/page2md/issues/51)) ([19144e0](https://github.com/michalschroeder/page2md/commit/19144e058b2fcf4551d19dbb9b931b9a18f13e73))
+
 ## [1.1.1](https://github.com/michalschroeder/page2md/compare/v1.1.0...v1.1.1) (2026-05-20)
 
 
