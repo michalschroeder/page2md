@@ -80,6 +80,53 @@ test("parses --json", () => {
 	})
 })
 
+test("parses -p value", () => {
+	const r = parseArgs(["-p", "title", "example.com"])
+	expect(r).toEqual({
+		kind: "run",
+		url: "https://example.com",
+		noRender: false,
+		externals: false,
+		json: false,
+		property: "title",
+	})
+})
+
+test("parses --property=value", () => {
+	const r = parseArgs(["--property=author", "example.com"])
+	expect(r).toMatchObject({ kind: "run", property: "author" })
+})
+
+test("throws on -p with no value", () => {
+	try {
+		parseArgs(["-p"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/-p requires a non-empty value/)
+	}
+})
+
+test("throws on empty --property=value", () => {
+	try {
+		parseArgs(["--property=", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--property requires a non-empty value/)
+	}
+})
+
+test("throws on -p consuming a flag-like value", () => {
+	try {
+		parseArgs(["-p", "--no-render", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/-p requires a value/)
+	}
+})
+
 test("parses -j", () => {
 	const r = parseArgs(["-j", "example.com"])
 	expect(r).toEqual({

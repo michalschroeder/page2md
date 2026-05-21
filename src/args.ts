@@ -6,6 +6,7 @@ export type ParseResult =
 			noRender: boolean
 			externals: boolean
 			json: boolean
+			property?: string
 			userAgent?: string
 			timeoutMs?: number
 	  }
@@ -57,6 +58,7 @@ export function parseArgs(argv: string[]): ParseResult {
 	let noRender = false
 	let externals = false
 	let json = false
+	let property: string | undefined
 	let userAgent: string | undefined
 	let timeoutMs: number | undefined
 	for (let i = 0; i < argv.length; i++) {
@@ -81,6 +83,14 @@ export function parseArgs(argv: string[]): ParseResult {
 		}
 		if (a === "-j" || a === "--json") {
 			json = true
+			continue
+		}
+		if (a === "-p" || a === "--property") {
+			property = requireValue(a, requireNonEmpty(a, argv[++i]))
+			continue
+		}
+		if (a.startsWith("--property=")) {
+			property = requireNonEmpty("--property", a.slice("--property=".length))
 			continue
 		}
 		if (a === "--user-agent") {
@@ -112,6 +122,7 @@ export function parseArgs(argv: string[]): ParseResult {
 		json,
 	}
 	if (output !== undefined) run.output = output
+	if (property !== undefined) run.property = property
 	if (userAgent !== undefined) run.userAgent = userAgent
 	if (timeoutMs !== undefined) run.timeoutMs = timeoutMs
 	return run

@@ -23,6 +23,8 @@ Options:
       --no-render         skip Chromium; plain HTTP fetch, no JS (static pages only)
       --externals         enrich third-party embeds via network (Twitter/YouTube/Reddit); off by default
   -j, --json              emit full Defuddle result as JSON (title, author, content, …)
+  -p, --property <name>   print a single field (title, author, content, wordCount, …)
+                          exits 3 if the field is missing/empty; combine with -j to JSON-encode
       --user-agent <ua>   override User-Agent header (both modes)
       --timeout <ms>      page-load timeout in ms (1–300000, default 30000)
   -h, --help              show this help
@@ -55,7 +57,7 @@ if (parsed.kind === "version") {
 	process.exit(0)
 }
 
-const { url, output, noRender, externals, json, userAgent, timeoutMs } = parsed
+const { url, output, noRender, externals, json, property, userAgent, timeoutMs } = parsed
 const ua = userAgent ?? DEFAULT_UA
 const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
 
@@ -84,11 +86,21 @@ try {
 
 	try {
 		const result = await Defuddle(input, url, { markdown: true, useAsync: externals })
-		if (!result.content) {
-			console.error(`error: extracted no content from ${url}`)
-			process.exit(3)
+		let out: string
+		if (property !== undefined) {
+			const value = (result as unknown as Record<string, unknown>)[property]
+			if (value === undefined || value === null || value === "") {
+				console.error(`error: property "${property}" missing or empty`)
+				process.exit(3)
+			}
+			out = json || typeof value !== "string" ? JSON.stringify(value) : value
+		} else {
+			if (!result.content) {
+				console.error(`error: extracted no content from ${url}`)
+				process.exit(3)
+			}
+			out = json ? JSON.stringify(result) : result.content
 		}
-		const out = json ? JSON.stringify(result) : result.content
 		if (output) writeFileSync(output, out)
 		else process.stdout.write(out)
 	} catch (err) {
