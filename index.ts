@@ -57,7 +57,7 @@ if (parsed.kind === "version") {
 	process.exit(0)
 }
 
-const { url, output, noRender, externals, json, property, userAgent, timeoutMs } = parsed
+const { url, output, noRender, externals, json, property, userAgent, timeoutMs, stealth } = parsed
 const ua = userAgent ?? DEFAULT_UA
 const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
 
@@ -72,10 +72,7 @@ try {
 			process.exit(2)
 		}
 	} else {
-		browser = await chromium.launch({
-			channel: "chromium-headless-shell",
-			args: ["--disable-dev-shm-usage", "--no-sandbox"],
-		})
+		browser = await launchChromium(stealth ?? false)
 		try {
 			input = await fetchRenderedHtml(browser, url, ua, timeout)
 		} catch (err) {
@@ -109,6 +106,18 @@ try {
 	}
 } finally {
 	await browser?.close()
+}
+
+async function launchChromium(stealth: boolean): Promise<Browser> {
+	const opts = {
+		channel: "chromium-headless-shell",
+		args: ["--disable-dev-shm-usage", "--no-sandbox"],
+	}
+	if (!stealth) return chromium.launch(opts)
+	const { chromium: stealthChromium } = await import("playwright-extra")
+	const StealthPlugin = (await import("puppeteer-extra-plugin-stealth")).default
+	stealthChromium.use(StealthPlugin())
+	return stealthChromium.launch(opts) as unknown as Browser
 }
 
 async function fetchRenderedHtml(

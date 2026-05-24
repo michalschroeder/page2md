@@ -9,6 +9,7 @@ export type ParseResult =
 			property?: string
 			userAgent?: string
 			timeoutMs?: number
+			stealth?: boolean
 	  }
 	| { kind: "help" }
 	| { kind: "version" }
@@ -61,6 +62,7 @@ export function parseArgs(argv: string[]): ParseResult {
 	let property: string | undefined
 	let userAgent: string | undefined
 	let timeoutMs: number | undefined
+	let stealth = false
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i]
 		if (a === "-h" || a === "--help") return { kind: "help" }
@@ -75,6 +77,10 @@ export function parseArgs(argv: string[]): ParseResult {
 		}
 		if (a === "--no-render") {
 			noRender = true
+			continue
+		}
+		if (a === "--stealth") {
+			stealth = true
 			continue
 		}
 		if (a === "--externals") {
@@ -125,5 +131,6 @@ export function parseArgs(argv: string[]): ParseResult {
 	if (property !== undefined) run.property = property
 	if (userAgent !== undefined) run.userAgent = userAgent
 	if (timeoutMs !== undefined) run.timeoutMs = timeoutMs
+	if (stealth) run.stealth = true
 	return run
 }

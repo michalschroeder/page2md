@@ -138,6 +138,15 @@ test("parses -j", () => {
 	})
 })
 
+test("parses --stealth", () => {
+	const r = parseArgs(["--stealth", "example.com"])
+	expect(r).toMatchObject({ kind: "run", stealth: true })
+})
+
+test("omits stealth when flag absent", () => {
+	expect(parseArgs(["example.com"])).not.toHaveProperty("stealth")
+})
+
 test("returns help for -h", () => {
 	expect(parseArgs(["-h"])).toEqual({ kind: "help" })
 })
