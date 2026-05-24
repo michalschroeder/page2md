@@ -56,6 +56,18 @@ URL scheme is optional (`https://` is assumed).
 
 > **Tip:** add `--init` (`docker run --init --rm ...`) so Chromium's child processes get reaped cleanly if you ctrl-C mid-render.
 
+### Slow or JS-heavy pages
+
+By default page2md grabs the DOM the moment it's ready (`domcontentloaded`). Single-page apps that load their content *after* the initial render come back empty — give them an extra wait:
+
+```sh
+# wait 6s after load for late-rendering SPA content
+docker run --rm ghcr.io/michalschroeder/page2md --wait-ms 6000 https://bsky.app/profile/bsky.app
+```
+
+- `--wait-ms <n>` — extra delay (ms, 0–300000) after load. The reliable lever for client-rendered SPAs.
+- `--wait-until <event>` — `domcontentloaded` (default), `load`, or `networkidle`. `networkidle` waits for the network to go quiet; skip it on apps that hold connections open (it never settles).
+
 ### Shell wrapper
 
 Bash/zsh:
