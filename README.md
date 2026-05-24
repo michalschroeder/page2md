@@ -23,7 +23,7 @@ Many pages need JS to render. `curl | defuddle` misses SPA content. page2md runs
 - **Feeding pages to an LLM** — Markdown is ~19× smaller than rendered HTML (see [Token savings](#token-savings)), and the model sees content, not chrome.
 - **Archiving / note-taking** — clean, diff-able Markdown for Obsidian, Logseq, git.
 - **Scraping pipelines** — deterministic output, no AI in the loop, no hallucinated content.
-- **Bot-blocked pages** — sites that 403 a plain `fetch`/`curl` (Stack Overflow, GitHub at times) render fine here because page2md uses a real browser.
+- **Bot-blocked pages** — sites that 403 a plain `fetch`/`curl` (e.g. Stack Overflow) render here because page2md drives a real browser.
 
 ### vs. alternatives
 
@@ -32,7 +32,7 @@ Many pages need JS to render. `curl | defuddle` misses SPA content. page2md runs
 | `curl` (raw HTML) | ✗ | ✗ | ✓ | none |
 | `curl \| pandoc` | ✗ | ✗ | ✓ | none |
 | `curl \| readability-cli \| pandoc` | ✗ | ✓ (articles only) | ✓ | none |
-| AI fetchers (Claude WebFetch, etc.) | partial | ✓ | ✗ | pays LLM tokens on every fetch |
+| AI fetchers (Claude WebFetch, etc.) | ✗ | ✓ | ✗ | pays LLM tokens to extract |
 | **page2md** | ✓ | ✓ (Defuddle) | ✓ | none |
 
 Reach for `curl | pandoc` if the page is static and you want every byte. Reach for page2md when you want the actual rendered article as faithful Markdown — no LLM in the conversion path, so the only tokens you spend are on the output you actually feed downstream.
@@ -84,23 +84,25 @@ def page2md [url: string] { docker run --rm ghcr.io/michalschroeder/page2md $url
 
 ## Token savings
 
-Feeding raw HTML to an LLM burns tokens on tags, scripts, and chrome. page2md hands the model just the article.
+Feeding raw or rendered HTML to an LLM burns tokens on tags, scripts, and chrome. page2md hands the model just the article.
+
+The numbers below compare page2md's Markdown against the HTML itself — what you'd spend dumping a page straight into context. AI fetchers like WebFetch already extract before returning (and don't run JS), so page2md's edge over *those* is JS rendering and deterministic output, not raw token count.
 
 <!-- token-comparison:start -->
 
-Across 8 pages, page2md output is **19.0× smaller** than rendered HTML in tokens (95% savings, `cl100k_base`).
+Across 8 pages, page2md output is **18.9× smaller** than rendered HTML in tokens (95% savings, `cl100k_base`).
 
 | Page | Rendered HTML | page2md MD | Savings |
 | --- | ---: | ---: | ---: |
 | example.com | 153 | 29 | 81% |
-| Wikipedia article | 114,256 | 20,322 | 82% |
-| Hacker News front page | 11,822 | 2,141 | 82% |
-| MDN reference page | 26,334 | 2,775 | 89% |
-| React docs page | 152,452 | 6,251 | 96% |
+| Wikipedia article | 114,220 | 20,322 | 82% |
+| Hacker News front page | 11,766 | 2,121 | 82% |
+| MDN reference page | 26,063 | 2,775 | 89% |
+| React docs page | 152,462 | 6,251 | 96% |
 | Personal blog post | 30,205 | 1,713 | 94% |
-| Stack Overflow Q&A | 269,576 | 4,727 | 98% |
-| page2md GH repo | 138,992 | 1,254 | 99% |
-| **Total** | **743,790** | **39,212** | **95%** |
+| Stack Overflow Q&A | 269,408 | 4,727 | 98% |
+| page2md GH repo | 139,025 | 1,297 | 99% |
+| **Total** | **743,302** | **39,235** | **95%** |
 
 <!-- token-comparison:end -->
 
