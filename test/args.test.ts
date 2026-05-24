@@ -398,3 +398,65 @@ test("throws on --timeout above max", () => {
 		expect((e as ArgsError).message).toMatch(/between 1 and 300000/)
 	}
 })
+
+test("parses --wait-ms value", () => {
+	const r = parseArgs(["--wait-ms", "6000", "example.com"])
+	expect(r).toEqual({
+		kind: "run",
+		url: "https://example.com",
+		noRender: false,
+		externals: false,
+		json: false,
+		waitMs: 6000,
+	})
+})
+
+test("parses --wait-ms=value", () => {
+	const r = parseArgs(["--wait-ms=6000", "example.com"])
+	expect(r).toMatchObject({ kind: "run", waitMs: 6000 })
+})
+
+test("accepts --wait-ms=0", () => {
+	const r = parseArgs(["--wait-ms=0", "example.com"])
+	expect(r).toMatchObject({ kind: "run", waitMs: 0 })
+})
+
+test("throws on non-numeric --wait-ms", () => {
+	try {
+		parseArgs(["--wait-ms=abc", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/non-negative integer/)
+	}
+})
+
+test("throws on --wait-ms above max", () => {
+	try {
+		parseArgs(["--wait-ms=300001", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/between 0 and 300000/)
+	}
+})
+
+test("parses --wait-until networkidle", () => {
+	const r = parseArgs(["--wait-until=networkidle", "example.com"])
+	expect(r).toMatchObject({ kind: "run", waitUntil: "networkidle" })
+})
+
+test("parses --wait-until load (separate value)", () => {
+	const r = parseArgs(["--wait-until", "load", "example.com"])
+	expect(r).toMatchObject({ kind: "run", waitUntil: "load" })
+})
+
+test("throws on invalid --wait-until", () => {
+	try {
+		parseArgs(["--wait-until=idle", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--wait-until must be one of/)
+	}
+})

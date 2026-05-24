@@ -3,7 +3,7 @@ import { writeFileSync } from "node:fs"
 import { Defuddle } from "defuddle/node"
 import { type Browser, chromium } from "playwright"
 import pkg from "./package.json" with { type: "json" }
-import { ArgsError, parseArgs } from "./src/args"
+import { ArgsError, parseArgs, type WaitUntil } from "./src/args"
 import { prepareInput } from "./src/clean"
 import { DEFAULT_UA, fetchStaticHtml } from "./src/fetch-static"
 
@@ -27,6 +27,8 @@ Options:
                           exits 3 if the field is missing/empty; combine with -j to JSON-encode
       --user-agent <ua>   override User-Agent header (both modes)
       --timeout <ms>      page-load timeout in ms (1–300000, default 30000)
+      --wait-until <e>    nav wait event: domcontentloaded (default), load, networkidle
+      --wait-ms <ms>      extra delay after load, for late-rendering SPAs (0–300000)
   -h, --help              show this help
   -V, --version           show version
 
@@ -60,6 +62,8 @@ if (parsed.kind === "version") {
 const { url, output, noRender, externals, json, property, userAgent, timeoutMs, stealth } = parsed
 const ua = userAgent ?? DEFAULT_UA
 const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
+const waitUntil = parsed.waitUntil ?? "domcontentloaded"
+const waitMs = parsed.waitMs ?? 0
 
 let browser: Browser | undefined
 let input: Document | string
@@ -74,7 +78,7 @@ try {
 	} else {
 		browser = await launchChromium(stealth ?? false)
 		try {
-			input = await fetchRenderedHtml(browser, url, ua, timeout)
+			input = await fetchRenderedHtml(browser, url, ua, timeout, waitUntil, waitMs)
 		} catch (err) {
 			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
 			process.exit(2)
@@ -125,6 +129,8 @@ async function fetchRenderedHtml(
 	url: string,
 	userAgent: string,
 	timeoutMs: number,
+	waitUntil: WaitUntil,
+	waitMs: number,
 ) {
 	const ctx = await browser.newContext({
 		javaScriptEnabled: true,
@@ -135,6 +141,7 @@ async function fetchRenderedHtml(
 		SKIP_RESOURCES.has(route.request().resourceType()) ? route.abort() : route.continue(),
 	)
 	const page = await ctx.newPage()
-	await page.goto(url, { waitUntil: "domcontentloaded", timeout: timeoutMs })
+	await page.goto(url, { waitUntil, timeout: timeoutMs })
+	if (waitMs > 0) await page.waitForTimeout(waitMs)
 	return prepareInput(await page.content())
 }

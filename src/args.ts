@@ -10,11 +10,16 @@ export type ParseResult =
 			userAgent?: string
 			timeoutMs?: number
 			stealth?: boolean
+			waitUntil?: WaitUntil
+			waitMs?: number
 	  }
 	| { kind: "help" }
 	| { kind: "version" }
 
 export const TIMEOUT_MAX_MS = 300_000
+
+export type WaitUntil = "domcontentloaded" | "load" | "networkidle"
+const WAIT_UNTIL_VALUES: readonly WaitUntil[] = ["domcontentloaded", "load", "networkidle"]
 
 export class ArgsError extends Error {
 	exitCode: number
@@ -53,6 +58,28 @@ function parseTimeoutMs(value: string | undefined): number {
 	return n
 }
 
+function parseWaitMs(value: string | undefined): number {
+	if (value === undefined || value.trim() === "") {
+		throw new ArgsError("--wait-ms requires a value in milliseconds")
+	}
+	if (!/^\d+$/.test(value.trim())) {
+		throw new ArgsError(`--wait-ms must be a non-negative integer in milliseconds, got: ${value}`)
+	}
+	const n = Number(value)
+	if (n > TIMEOUT_MAX_MS) {
+		throw new ArgsError(`--wait-ms must be between 0 and ${TIMEOUT_MAX_MS} ms, got: ${n}`)
+	}
+	return n
+}
+
+function parseWaitUntil(value: string | undefined): WaitUntil {
+	const v = requireNonEmpty("--wait-until", value)
+	if (!(WAIT_UNTIL_VALUES as readonly string[]).includes(v)) {
+		throw new ArgsError(`--wait-until must be one of ${WAIT_UNTIL_VALUES.join(", ")}, got: ${v}`)
+	}
+	return v as WaitUntil
+}
+
 export function parseArgs(argv: string[]): ParseResult {
 	let url: string | undefined
 	let output: string | undefined
@@ -63,6 +90,8 @@ export function parseArgs(argv: string[]): ParseResult {
 	let userAgent: string | undefined
 	let timeoutMs: number | undefined
 	let stealth = false
+	let waitUntil: WaitUntil | undefined
+	let waitMs: number | undefined
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i]
 		if (a === "-h" || a === "--help") return { kind: "help" }
@@ -115,6 +144,22 @@ export function parseArgs(argv: string[]): ParseResult {
 			timeoutMs = parseTimeoutMs(a.slice("--timeout=".length))
 			continue
 		}
+		if (a === "--wait-until") {
+			waitUntil = parseWaitUntil(argv[++i])
+			continue
+		}
+		if (a.startsWith("--wait-until=")) {
+			waitUntil = parseWaitUntil(a.slice("--wait-until=".length))
+			continue
+		}
+		if (a === "--wait-ms") {
+			waitMs = parseWaitMs(argv[++i])
+			continue
+		}
+		if (a.startsWith("--wait-ms=")) {
+			waitMs = parseWaitMs(a.slice("--wait-ms=".length))
+			continue
+		}
 		if (a.startsWith("-")) throw new ArgsError(`unknown option: ${a}`)
 		url = a
 	}
@@ -132,5 +177,7 @@ export function parseArgs(argv: string[]): ParseResult {
 	if (userAgent !== undefined) run.userAgent = userAgent
 	if (timeoutMs !== undefined) run.timeoutMs = timeoutMs
 	if (stealth) run.stealth = true
+	if (waitUntil !== undefined) run.waitUntil = waitUntil
+	if (waitMs !== undefined) run.waitMs = waitMs
 	return run
 }
