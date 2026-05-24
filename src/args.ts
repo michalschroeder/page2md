@@ -12,6 +12,7 @@ export type ParseResult =
 			stealth?: boolean
 			waitUntil?: WaitUntil
 			waitMs?: number
+			auto?: boolean
 	  }
 	| { kind: "help" }
 	| { kind: "version" }
@@ -92,6 +93,7 @@ export function parseArgs(argv: string[]): ParseResult {
 	let stealth = false
 	let waitUntil: WaitUntil | undefined
 	let waitMs: number | undefined
+	let auto = false
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i]
 		if (a === "-h" || a === "--help") return { kind: "help" }
@@ -110,6 +112,10 @@ export function parseArgs(argv: string[]): ParseResult {
 		}
 		if (a === "--stealth") {
 			stealth = true
+			continue
+		}
+		if (a === "--auto") {
+			auto = true
 			continue
 		}
 		if (a === "--externals") {
@@ -179,5 +185,6 @@ export function parseArgs(argv: string[]): ParseResult {
 	if (stealth) run.stealth = true
 	if (waitUntil !== undefined) run.waitUntil = waitUntil
 	if (waitMs !== undefined) run.waitMs = waitMs
+	if (auto) run.auto = true
 	return run
 }

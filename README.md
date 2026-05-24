@@ -68,6 +68,14 @@ docker run --rm ghcr.io/michalschroeder/page2md --wait-ms 6000 https://bsky.app/
 - `--wait-ms <n>` — extra delay (ms, 0–300000) after load. The reliable lever for client-rendered SPAs.
 - `--wait-until <event>` — `domcontentloaded` (default), `load`, or `networkidle`. `networkidle` waits for the network to go quiet; skip it on apps that hold connections open (it never settles).
 
+Or don't pick flags by hand — `--auto` retries with progressively stronger render settings until something extracts:
+
+```sh
+docker run --rm ghcr.io/michalschroeder/page2md --auto https://bsky.app/profile/bsky.app
+```
+
+It escalates **only on failure**, so simple pages still take the fast default path; each retry is logged to stderr. Not every page is reachable — some stay blocked or empty.
+
 ### Shell wrapper
 
 Bash/zsh:

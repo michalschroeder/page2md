@@ -29,6 +29,7 @@ Options:
       --timeout <ms>      page-load timeout in ms (1–300000, default 30000)
       --wait-until <e>    nav wait event: domcontentloaded (default), load, networkidle
       --wait-ms <ms>      extra delay after load, for late-rendering SPAs (0–300000)
+      --auto              on empty/failed render, auto-retry with stronger settings
   -h, --help              show this help
   -V, --version           show version
 
@@ -36,6 +37,7 @@ Examples:
   page2md example.com
   page2md -o page.md https://example.com
   page2md --no-render https://en.wikipedia.org/wiki/Quicksort
+  page2md --auto https://bsky.app/profile/bsky.app
   page2md --user-agent "Mozilla/5.0 (compatible; mybot/1.0)" example.com
 `
 
@@ -59,57 +61,101 @@ if (parsed.kind === "version") {
 	process.exit(0)
 }
 
-const { url, output, noRender, externals, json, property, userAgent, timeoutMs, stealth } = parsed
+const { url, output, noRender, externals, json, property, userAgent, timeoutMs, stealth, auto } =
+	parsed
 const ua = userAgent ?? DEFAULT_UA
 const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
-const waitUntil = parsed.waitUntil ?? "domcontentloaded"
-const waitMs = parsed.waitMs ?? 0
+const baseWaitUntil = parsed.waitUntil ?? "domcontentloaded"
+const baseWaitMs = parsed.waitMs ?? 0
 
-let browser: Browser | undefined
-let input: Document | string
-try {
-	if (noRender) {
-		try {
-			input = await fetchStaticHtml(url, timeout, ua)
-		} catch (err) {
-			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
-			process.exit(2)
-		}
-	} else {
-		browser = await launchChromium(stealth ?? false)
-		try {
-			input = await fetchRenderedHtml(browser, url, ua, timeout, waitUntil, waitMs)
-		} catch (err) {
-			console.error(`error: failed to load ${url}: ${errMessage(err)}`)
-			process.exit(2)
-		}
+type Strategy = { stealth: boolean; waitUntil: WaitUntil; waitMs: number; label: string }
+type Outcome = { out: string } | { code: number; msg: string }
+type DefuddleResult = Awaited<ReturnType<typeof Defuddle>>
+
+let outcome: Outcome
+if (noRender) {
+	outcome = await staticAttempt()
+} else {
+	const strats = strategies()
+	outcome = { code: 2, msg: `failed to load ${url}` }
+	for (let i = 0; i < strats.length; i++) {
+		if (auto && i > 0) process.stderr.write(`page2md: retrying with ${strats[i].label}\n`)
+		outcome = await renderAttempt(strats[i])
+		if ("out" in outcome) break
 	}
+}
 
+if ("code" in outcome) {
+	console.error(`error: ${outcome.msg}`)
+	process.exit(outcome.code)
+}
+if (output) writeFileSync(output, outcome.out)
+else process.stdout.write(outcome.out)
+
+// Strategies to try in order. Without --auto, a single attempt honoring the
+// flags as given. With --auto, escalate default → wait → stealth+wait, reusing
+// any explicit --wait-ms/--stealth as the base.
+function strategies(): Strategy[] {
+	const base = { stealth: stealth ?? false, waitUntil: baseWaitUntil, waitMs: baseWaitMs }
+	if (!auto) return [{ ...base, label: "" }]
+	const w = baseWaitMs || 6_000
+	return [
+		{ ...base, label: "default" },
+		{ ...base, waitMs: w, label: `--wait-ms ${w}` },
+		{ ...base, stealth: true, waitMs: w, label: `evasive rendering + --wait-ms ${w}` },
+	]
+}
+
+// Convert a Defuddle result to output, or a failure (empty content / missing
+// property) that --auto treats as a reason to escalate.
+function toOutput(result: DefuddleResult): Outcome {
+	if (property !== undefined) {
+		const value = (result as unknown as Record<string, unknown>)[property]
+		if (value === undefined || value === null || value === "") {
+			return { code: 3, msg: `property "${property}" missing or empty` }
+		}
+		return { out: json || typeof value !== "string" ? JSON.stringify(value) : value }
+	}
+	if (!result.content) return { code: 3, msg: `extracted no content from ${url}` }
+	return { out: json ? JSON.stringify(result) : result.content }
+}
+
+async function renderAttempt(strat: Strategy): Promise<Outcome> {
+	let browser: Browser | undefined
 	try {
-		const result = await Defuddle(input, url, { markdown: true, useAsync: externals })
-		let out: string
-		if (property !== undefined) {
-			const value = (result as unknown as Record<string, unknown>)[property]
-			if (value === undefined || value === null || value === "") {
-				console.error(`error: property "${property}" missing or empty`)
-				process.exit(3)
-			}
-			out = json || typeof value !== "string" ? JSON.stringify(value) : value
-		} else {
-			if (!result.content) {
-				console.error(`error: extracted no content from ${url}`)
-				process.exit(3)
-			}
-			out = json ? JSON.stringify(result) : result.content
-		}
-		if (output) writeFileSync(output, out)
-		else process.stdout.write(out)
+		browser = await launchChromium(strat.stealth)
 	} catch (err) {
-		console.error(`error: ${errMessage(err)}`)
-		process.exit(4)
+		return { code: 2, msg: `failed to launch browser: ${errMessage(err)}` }
 	}
-} finally {
-	await browser?.close()
+	try {
+		let input: Document | string
+		try {
+			input = await fetchRenderedHtml(browser, url, ua, timeout, strat.waitUntil, strat.waitMs)
+		} catch (err) {
+			return { code: 2, msg: `failed to load ${url}: ${errMessage(err)}` }
+		}
+		try {
+			return toOutput(await Defuddle(input, url, { markdown: true, useAsync: externals }))
+		} catch (err) {
+			return { code: 4, msg: errMessage(err) }
+		}
+	} finally {
+		await browser?.close()
+	}
+}
+
+async function staticAttempt(): Promise<Outcome> {
+	let input: Document | string
+	try {
+		input = await fetchStaticHtml(url, timeout, ua)
+	} catch (err) {
+		return { code: 2, msg: `failed to load ${url}: ${errMessage(err)}` }
+	}
+	try {
+		return toOutput(await Defuddle(input, url, { markdown: true, useAsync: externals }))
+	} catch (err) {
+		return { code: 4, msg: errMessage(err) }
+	}
 }
 
 async function launchChromium(stealth: boolean): Promise<Browser> {
