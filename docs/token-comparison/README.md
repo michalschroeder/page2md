@@ -19,14 +19,14 @@ Reproduce with `make token-comparison`. Numbers fluctuate with each page edit; t
 | Page | Raw HTML | Rendered HTML | page2md MD | MD vs raw | MD vs rendered | Savings vs rendered |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | example.com | 152 | 153 | 29 | 5.2× smaller | 5.3× smaller | 81% |
-| Wikipedia article | 113,647 | 114,256 | 20,322 | 5.6× smaller | 5.6× smaller | 82% |
-| Hacker News front page | 11,823 | 11,822 | 2,141 | 5.5× smaller | 5.5× smaller | 82% |
-| MDN reference page | 44,692 | 26,334 | 2,775 | 16.1× smaller | 9.5× smaller | 89% |
-| React docs page | 152,214 | 152,452 | 6,251 | 24.4× smaller | 24.4× smaller | 96% |
+| Wikipedia article | 113,600 | 114,220 | 20,322 | 5.6× smaller | 5.6× smaller | 82% |
+| Hacker News front page | 11,757 | 11,766 | 2,121 | 5.5× smaller | 5.5× smaller | 82% |
+| MDN reference page | 44,699 | 26,063 | 2,775 | 16.1× smaller | 9.4× smaller | 89% |
+| React docs page | 152,224 | 152,462 | 6,251 | 24.4× smaller | 24.4× smaller | 96% |
 | Personal blog post | 30,206 | 30,205 | 1,713 | 17.6× smaller | 17.6× smaller | 94% |
-| Stack Overflow Q&A | _error_ | 269,576 | 4,727 | _error_ | 57.0× smaller | 98% |
-| page2md GH repo | _error_ | 138,992 | 1,254 | _error_ | 110.8× smaller | 99% |
-| **Total** | **352,734** | **743,790** | **39,212** | **9.0×** | **19.0×** | **95%** |
+| Stack Overflow Q&A | _error_ | 269,408 | 4,727 | _error_ | 57.0× smaller | 98% |
+| page2md GH repo | 132,021 | 139,025 | 1,297 | 101.8× smaller | 107.2× smaller | 99% |
+| **Total** | **484,659** | **743,302** | **39,235** | **12.4×** | **18.9×** | **95%** |
 
 Byte sizes (KiB) for reference:
 
@@ -35,17 +35,18 @@ Byte sizes (KiB) for reference:
 | example.com | 1 | 1 | 0 |
 | Wikipedia article | 358 | 360 | 76 |
 | Hacker News front page | 34 | 34 | 7 |
-| MDN reference page | 153 | 91 | 10 |
+| MDN reference page | 153 | 90 | 10 |
 | React docs page | 431 | 432 | 26 |
 | Personal blog post | 94 | 94 | 7 |
 | Stack Overflow Q&A | _error_ | 864 | 18 |
-| page2md GH repo | _error_ | 339 | 4 |
+| page2md GH repo | 325 | 340 | 4 |
 
 ## Errors
 
 - **Stack Overflow Q&A** (https://stackoverflow.com/questions/231767/what-does-the-yield-keyword-do-in-python): raw: HTTP 403
-- **page2md GH repo** (https://github.com/michalschroeder/page2md): raw: The socket connection was closed unexpectedly. For more information, pass `verbose: true` in the second argument to fetch()
 
 ## Takeaway
 
 Feeding raw or rendered HTML to a model burns tokens on tags, scripts, inline JSON, navigation chrome, and ads. The article you actually want is a tiny fraction of that. page2md extracts that fraction so the model spends its context window on content, not boilerplate.
+
+These figures measure HTML fed to a model directly. AI fetchers like Claude's WebFetch already extract to Markdown before returning (and fetch static HTML, no JS), so page2md's advantage over such tools is JS rendering and deterministic output, not token count alone.
