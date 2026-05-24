@@ -180,6 +180,10 @@ function renderReport(rows: Row[]): string {
 		"Feeding raw or rendered HTML to a model burns tokens on tags, scripts, inline JSON, navigation chrome, and ads. The article you actually want is a tiny fraction of that. page2md extracts that fraction so the model spends its context window on content, not boilerplate.",
 	)
 	lines.push("")
+	lines.push(
+		"These figures measure HTML fed to a model directly. AI fetchers like Claude's WebFetch already extract to Markdown before returning (and fetch static HTML, no JS), so page2md's advantage over such tools is JS rendering and deterministic output, not token count alone.",
+	)
+	lines.push("")
 	return `${lines.join("\n")}`
 }
 
