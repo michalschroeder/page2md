@@ -170,6 +170,11 @@ export function parseArgs(argv: string[]): ParseResult {
 		url = a
 	}
 	if (!url) throw new ArgsError("URL required (see --help)")
+	if (auto && noRender) {
+		throw new ArgsError(
+			"--auto cannot be combined with --no-render (--auto only escalates rendering)",
+		)
+	}
 	const finalUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`
 	const run: Extract<ParseResult, { kind: "run" }> = {
 		kind: "run",

@@ -6,6 +6,7 @@ import pkg from "./package.json" with { type: "json" }
 import { ArgsError, parseArgs, type WaitUntil } from "./src/args"
 import { prepareInput } from "./src/clean"
 import { DEFAULT_UA, fetchStaticHtml } from "./src/fetch-static"
+import { buildStrategies, type Strategy } from "./src/strategies"
 
 const SKIP_RESOURCES = new Set(["image", "font", "media", "stylesheet"])
 const DEFAULT_TIMEOUT_MS = 30_000
@@ -65,24 +66,33 @@ const { url, output, noRender, externals, json, property, userAgent, timeoutMs, 
 	parsed
 const ua = userAgent ?? DEFAULT_UA
 const timeout = timeoutMs ?? DEFAULT_TIMEOUT_MS
-const baseWaitUntil = parsed.waitUntil ?? "domcontentloaded"
-const baseWaitMs = parsed.waitMs ?? 0
 
-type Strategy = { stealth: boolean; waitUntil: WaitUntil; waitMs: number; label: string }
 type Outcome = { out: string } | { code: number; msg: string }
+type Failure = Extract<Outcome, { code: number }>
 type DefuddleResult = Awaited<ReturnType<typeof Defuddle>>
 
 let outcome: Outcome
 if (noRender) {
 	outcome = await staticAttempt()
 } else {
-	const strats = strategies()
+	const strats = buildStrategies({
+		auto: auto ?? false,
+		stealth: stealth ?? false,
+		waitUntil: parsed.waitUntil ?? "domcontentloaded",
+		waitMs: parsed.waitMs,
+	})
+	// Report the first (baseline) failure if every rung fails, so --auto's exit
+	// code matches what a plain run would have produced rather than the last
+	// rung's escalated error.
+	let firstFailure: Failure | undefined
 	outcome = { code: 2, msg: `failed to load ${url}` }
 	for (let i = 0; i < strats.length; i++) {
 		if (auto && i > 0) process.stderr.write(`page2md: retrying with ${strats[i].label}\n`)
 		outcome = await renderAttempt(strats[i])
 		if ("out" in outcome) break
+		firstFailure ??= outcome
 	}
+	if ("code" in outcome && firstFailure) outcome = firstFailure
 }
 
 if ("code" in outcome) {
@@ -91,20 +101,6 @@ if ("code" in outcome) {
 }
 if (output) writeFileSync(output, outcome.out)
 else process.stdout.write(outcome.out)
-
-// Strategies to try in order. Without --auto, a single attempt honoring the
-// flags as given. With --auto, escalate default → wait → stealth+wait, reusing
-// any explicit --wait-ms/--stealth as the base.
-function strategies(): Strategy[] {
-	const base = { stealth: stealth ?? false, waitUntil: baseWaitUntil, waitMs: baseWaitMs }
-	if (!auto) return [{ ...base, label: "" }]
-	const w = baseWaitMs || 6_000
-	return [
-		{ ...base, label: "default" },
-		{ ...base, waitMs: w, label: `--wait-ms ${w}` },
-		{ ...base, stealth: true, waitMs: w, label: `evasive rendering + --wait-ms ${w}` },
-	]
-}
 
 // Convert a Defuddle result to output, or a failure (empty content / missing
 // property) that --auto treats as a reason to escalate.
@@ -158,6 +154,11 @@ async function staticAttempt(): Promise<Outcome> {
 	}
 }
 
+// Register the stealth plugin only once per process: playwright-extra's `use`
+// pushes onto a shared singleton without deduping, so repeated launches (e.g.
+// --auto escalating into the stealth rung) would otherwise stack duplicates.
+let stealthRegistered = false
+
 async function launchChromium(stealth: boolean): Promise<Browser> {
 	const opts = {
 		channel: "chromium-headless-shell",
@@ -165,8 +166,11 @@ async function launchChromium(stealth: boolean): Promise<Browser> {
 	}
 	if (!stealth) return chromium.launch(opts)
 	const { chromium: stealthChromium } = await import("playwright-extra")
-	const StealthPlugin = (await import("puppeteer-extra-plugin-stealth")).default
-	stealthChromium.use(StealthPlugin())
+	if (!stealthRegistered) {
+		const StealthPlugin = (await import("puppeteer-extra-plugin-stealth")).default
+		stealthChromium.use(StealthPlugin())
+		stealthRegistered = true
+	}
 	return stealthChromium.launch(opts) as unknown as Browser
 }
 

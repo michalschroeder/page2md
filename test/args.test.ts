@@ -474,3 +474,13 @@ test("--auto carries base --wait-ms/--stealth", () => {
 	const r = parseArgs(["--auto", "--wait-ms=8000", "--stealth", "example.com"])
 	expect(r).toMatchObject({ kind: "run", auto: true, waitMs: 8000, stealth: true })
 })
+
+test("throws on --auto with --no-render", () => {
+	try {
+		parseArgs(["--auto", "--no-render", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--auto cannot be combined with --no-render/)
+	}
+})
