@@ -460,3 +460,27 @@ test("throws on invalid --wait-until", () => {
 		expect((e as ArgsError).message).toMatch(/--wait-until must be one of/)
 	}
 })
+
+test("parses --auto", () => {
+	const r = parseArgs(["--auto", "example.com"])
+	expect(r).toMatchObject({ kind: "run", auto: true })
+})
+
+test("omits auto when flag absent", () => {
+	expect(parseArgs(["example.com"])).not.toHaveProperty("auto")
+})
+
+test("--auto carries base --wait-ms/--stealth", () => {
+	const r = parseArgs(["--auto", "--wait-ms=8000", "--stealth", "example.com"])
+	expect(r).toMatchObject({ kind: "run", auto: true, waitMs: 8000, stealth: true })
+})
+
+test("throws on --auto with --no-render", () => {
+	try {
+		parseArgs(["--auto", "--no-render", "example.com"])
+		throw new Error("expected throw")
+	} catch (e) {
+		expect(e).toBeInstanceOf(ArgsError)
+		expect((e as ArgsError).message).toMatch(/--auto cannot be combined with --no-render/)
+	}
+})
