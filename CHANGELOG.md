@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/michalschroeder/page2md/compare/v1.2.0...v1.3.0) (2026-05-24)
+
+
+### Features
+
+* add --auto for escalating retry on empty/blocked pages ([#56](https://github.com/michalschroeder/page2md/issues/56)) ([790ac71](https://github.com/michalschroeder/page2md/commit/790ac713ffa2198756a377f2b85b18ab870d1446))
+* add --wait-until and --wait-ms render options ([#54](https://github.com/michalschroeder/page2md/issues/54)) ([ffe199a](https://github.com/michalschroeder/page2md/commit/ffe199a1f56d5f75cc02be843126799a29cc18ee))
+
 ## [1.2.0](https://github.com/michalschroeder/page2md/compare/v1.1.1...v1.2.0) (2026-05-21)
 
 
