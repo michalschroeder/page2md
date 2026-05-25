@@ -71,6 +71,13 @@ type Outcome = { out: string } | { code: number; msg: string }
 type Failure = Extract<Outcome, { code: number }>
 type DefuddleResult = Awaited<ReturnType<typeof Defuddle>>
 
+// Register the stealth plugin only once per process: playwright-extra's `use`
+// pushes onto a shared singleton without deduping, so repeated launches (e.g.
+// --auto escalating into the stealth rung) would otherwise stack duplicates.
+// Declared above the top-level await below — `launchChromium` is hoisted, but
+// this `let` would be in its temporal dead zone if declared after the await.
+let stealthRegistered = false
+
 let outcome: Outcome
 if (noRender) {
 	outcome = await staticAttempt()
@@ -153,11 +160,6 @@ async function staticAttempt(): Promise<Outcome> {
 		return { code: 4, msg: errMessage(err) }
 	}
 }
-
-// Register the stealth plugin only once per process: playwright-extra's `use`
-// pushes onto a shared singleton without deduping, so repeated launches (e.g.
-// --auto escalating into the stealth rung) would otherwise stack duplicates.
-let stealthRegistered = false
 
 async function launchChromium(stealth: boolean): Promise<Browser> {
 	const opts = {
