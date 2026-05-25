@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/michalschroeder/page2md/compare/v1.3.0...v1.3.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* --auto evasive retry crashed before launching browser ([#57](https://github.com/michalschroeder/page2md/issues/57)) ([f8c1fee](https://github.com/michalschroeder/page2md/commit/f8c1feed80ce44af86dd48982c6c1966f6e518d7))
+
 ## [1.3.0](https://github.com/michalschroeder/page2md/compare/v1.2.0...v1.3.0) (2026-05-24)
 
 
