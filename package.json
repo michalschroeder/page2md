@@ -33,7 +33,7 @@
 		"puppeteer-extra-plugin-stealth": "2.11.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.15",
+		"@biomejs/biome": "2.4.16",
 		"@types/bun": "latest",
 		"js-tiktoken": "1.0.21",
 		"typescript": "6.0.3"
