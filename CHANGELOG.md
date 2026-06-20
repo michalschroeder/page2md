@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.2](https://github.com/michalschroeder/page2md/compare/v1.3.1...v1.3.2) (2026-06-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency defuddle to v0.19.0 ([#63](https://github.com/michalschroeder/page2md/issues/63)) ([5a118c7](https://github.com/michalschroeder/page2md/commit/5a118c70bdc9d0c0cdf371d68f875c3dfbed033f))
+* **deps:** update playwright monorepo to v1.61.0 ([#64](https://github.com/michalschroeder/page2md/issues/64)) ([fa74354](https://github.com/michalschroeder/page2md/commit/fa74354177a80c49bd1b191647023d7937558f49))
+
 ## [1.3.1](https://github.com/michalschroeder/page2md/compare/v1.3.0...v1.3.1) (2026-05-25)
 
 
