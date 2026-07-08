@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.4](https://github.com/michalschroeder/page2md/compare/v1.3.3...v1.3.4) (2026-07-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency linkedom to v0.18.13 ([#75](https://github.com/michalschroeder/page2md/issues/75)) ([a598140](https://github.com/michalschroeder/page2md/commit/a598140c862fa8955e5574894d2b2af88ebcd976))
+
 ## [1.3.3](https://github.com/michalschroeder/page2md/compare/v1.3.2...v1.3.3) (2026-06-24)
 
 
