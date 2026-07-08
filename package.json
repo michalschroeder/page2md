@@ -27,7 +27,7 @@
 	},
 	"dependencies": {
 		"defuddle": "0.19.1",
-		"linkedom": "0.18.12",
+		"linkedom": "0.18.13",
 		"playwright": "1.61.1",
 		"playwright-extra": "4.3.6",
 		"puppeteer-extra-plugin-stealth": "2.11.2"
